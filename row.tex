@@ -1,0 +1,23 @@
+
+test_equivalnece_after_unrolling( unrolling , f1, f2):
+	(f1',f2') = apply unrolling on f1 and f2
+	if basecase_test(f1',f2') is EQUIVALENT && 
+		   gap_test(f1',f2') is EQUIVALENT 	&& 
+		   stepcase_test(f1',f2') is EQUIVALENT:
+		return EQUIVALENT
+	else:	
+		return NOT EQUIVALENT
+	
+main(f1,f2):
+	if unrolling optimization exist:
+		find unrolling
+		return test_equivalnece_after_unrolling( unrolling , f1, f2)
+	else:
+		for every unrolling of f1 and f2 (advance gradually until timeout is reached):
+			(f1',f2') = apply unrolling on f1 and f2
+			if stepcase_test(f1',f2') is EQUIVALENT: 
+                                # Cut found
+				if gap_test(f1',f2') and basecase_test(f1',f2') are EQUIVALENT:
+					return EQUIVALENT
+				else:
+					return NOT EQUIVALENT

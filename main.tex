@@ -1,0 +1,80 @@
+\documentclass[12pt]{report}
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{arxiv}
+
+\usepackage[utf8x]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{float}
+\usepackage{amsmath} 
+\usepackage{algorithm}% http://ctan.org/pkg/algorithms
+\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+\usepackage{listings}
+\usepackage{color}
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning,automata}
+\lstset{language=C}
+
+\input{macros.tex}
+
+\title{Thesis}
+
+\author{
+  Chaked R.J.~Sayedoff \\
+  IE, Technion, Haifa, Israel.\\
+    \texttt{chaked@campus.technion.ac.il}\\
+}
+
+\begin{document}
+
+\maketitle
+\chapter*{Abstract}
+Abstract goes here
+
+\chapter*{Dedication}
+To mum and dad
+
+\chapter*{Declaration}
+I declare that..
+
+\chapter*{Acknowledgements}
+I want to thank...
+
+\tableofcontents
+
+\chapter{Introduction}
+\input{Chapters/Intro}
+
+\chapter{An Overview of RVT}
+\input{Chapters/RVT}
+
+\chapter{Program Equivalence For Non-Trivial Unbalanced Recursions}
+\input{Chapters/UnbalancedRecursion}
+
+\chapter{RVT & REVE Integration}
+\input{Chapters/RVTREVE}
+
+\chapter{Improving Completeness Using Value Analysis}
+\input{Chapters/ValueAnalysis}
+
+\chapter{Evaluation}
+\input{Chapters/Evaluation}
+
+\chapter{Future Work and Conclusion}
+\input{Chapters/FutureWorkConclusion}
+
+
+
+
+
+\bibliographystyle{plain}  
+\bibliography{references}
+
+\end{document}
