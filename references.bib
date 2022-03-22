@@ -276,3 +276,41 @@ publisher = {Microsoft Research},
 url = {https://www.microsoft.com/en-us/research/publication/conditional-equivalence/},
 number = {MSR-TR-2010-119},
 }
+
+@InProceedings{10.1007/11408901_21,
+author="Williams, Nicky
+and Marre, Bruno
+and Mouy, Patricia
+and Roger, Muriel",
+editor="Dal Cin, Mario
+and Ka{\^a}niche, Mohamed
+and Pataricza, Andr{\'a}s",
+title="PathCrawler: Automatic Generation of Path Tests by Combining Static and Dynamic Analysis",
+booktitle="Dependable Computing - EDCC 5",
+year="2005",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="281--292",
+abstract="We present the PathCrawler prototype tool for the automatic generation of test-cases satisfying the rigorous all-paths criterion, with a user-defined limit on the number of loop iterations in the covered paths. The prototype treats C code and we illustrate the test-case generation process on a representative example of a C function containing data-structures of variable dimensions, loops with variable numbers of iterations and many infeasible paths. PathCrawler is based on a novel combination of code instrumentation and constraint solving which makes it both efficient and open to extension. It suffers neither from the approximations and complexity of static analysis, nor from the number of executions demanded by the use of heuristic algorithms in function minimisation and the possibility that they fail to find a solution. We believe that it demonstrates the feasibility of rigorous and systematic testing of sequential programs coded in imperative languages.",
+isbn="978-3-540-32019-7"
+}
+
+@inproceedings{10.1145/1321631.1321746,
+author = {Sen, Koushik},
+title = {Concolic Testing},
+year = {2007},
+isbn = {9781595938824},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1321631.1321746},
+doi = {10.1145/1321631.1321746},
+abstract = {Concolic testing automates test input generation by combining the concrete and symbolic (concolic) execution of the code under test. Traditional test input generation techniques use either (1) concrete execution or (2) symbolic execution that builds constraints and is followed by a generation of concrete test inputs from these constraints. In contrast, concolic testing tightly couples both concrete and symbolic executions: they run simultaneously, and each gets feedback from the other.We have implemented concolic testing in tools for testing both C and Java programs. We have used the tools to find bugs in several real-world software systems including SGLIB, a popular C data structure library used in a commercial tool, a third-party implementation of the Needham-Schroeder protocol and the TMN protocol, the scheduler of Honeywell's DEOS real-time operating system, and the Sun Microsystems' JDK 1.4 collection framework. In this tutorial, we will describe concolic testing and some of its recent extensions},
+booktitle = {Proceedings of the Twenty-Second IEEE/ACM International Conference on Automated Software Engineering},
+pages = {571–572},
+numpages = {2},
+keywords = {testing C programs, unit testing, random testing, testing tools, concolic testing, data structure testing, symbolic execution, explicit path model-checking},
+location = {Atlanta, Georgia, USA},
+series = {ASE '07}
+}
+
+

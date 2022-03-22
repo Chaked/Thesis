@@ -1,12 +1,14 @@
 Talk about:
 1. Using function summaries to prove non-equivalence
 
-2. Elaborate the non-trivial rule to support mutually recursive functions
+2. Extend the CS-PART-EQ to support mutually recursive functions
 
-3a. Find Sync-Unrolling by increasingly try Sync-Unrolling until when helps us prove the step case. That means it has found related calls and can be used as our Sync-Unrolling. 
+3a. Find Sync-Unrolling by increasingly try Sync-Unrolling until step case is proved. That means it has found related calls and can be used as our Sync-Unrolling. 
 
-3b. The main problem with our current method is that it relays on CBMC unwinding which is limited to 5 (6 is unfeasible). 
+3b. The main problem with our current method for finding the sync-unrolling is that it relays on CBMC unwinding which is limited to 5 (6 is unfeasible). 
 maybe this could be replaced with Symbolic Execution as well.
 
+3c. We limit our recording of the inputs to 10. How do we do it unbounded?
 
 4. Talk about multi level pattern call graphs that a fixed single unrolling can not solve (Is this the same as conditioned-fibonacci? Did I solve this?)  
+ 

@@ -1,16 +1,18 @@
 \label{sec:rvtreview}
 \section{RVT's Strategy for Proving Equivalence}
 RVT is a Regression Verification Tool developed by Godlin and Strichman \cite{DBLP:conf/dac/GodlinS09}. RVT tries to prove partial equivalence for a pair of programs. Its strategy to solve the program equivalence challenge is inspired by the Hoare's rule for recursive invocation \cite{DBLP:series/lnm/Hoare71}: 
-\begin{equation}
+
+\begin{equation} \label{eqn:parteq}
  {\frac {\{p\} call\ \emph{proc} \{q\} \vdash_H \{p\} \emph{proc}-body \{q\}}{\{p\} call\ \emph{proc} \{q\}}} 
-  (PART-EQ)
- \end{equation}
+  (PART-EQ) 
+\end{equation}
+
 The rule says that if we can assume that {p} holds before the call to the procedure \emph{proc} and {q} holds afterward, and using this assumption we can prove that if {p} holds before executing the procedure body \emph{proc-body} then {q} holds afterward, so we can infer that if {p} holds before calling to \emph{proc} then it is granted that {q} will hold after the call. The revolutionary concept here is using what we want to infer as a hypothesis for the proof. They have created a new inference rule \cite{DBLP:conf/dac/GodlinS09}, in the spirit of the one we saw above. For $P1$ and $P2$ which are recursive procedures they say:
 \begin{equation}
  {\frac {{\emph{in}[call\ P_1]=\emph{in}[call\ P_2]\rightarrow \emph{out}[call\ P_1]=\emph{out}[call\ P_2]} \vdash{\emph{in}[P_1\ body]=\emph{in}[P_2\ body]\rightarrow \emph{out}[P_1\ body]=\emph{out}[P_2\ body]} }
 {{\emph{in}[call\ P_1]=\emph{in}[call\ P_2]\rightarrow \emph{out}[call\ P_1]=\emph{out}[call\ P_2]}}} 
 \end{equation}
-Basically, if the assumption that $P1$ and $P2$ produce the same output for the same input helps us to prove that the same input yields the same output upon executing $P1$ and $P2$ bodies then the congruence relation – equal input results in equal output – between $P1$ and $P2$ is proved. It was implemented by replacing recursive calls with calls to uninterrupted functions – $UF$s . An $UF$, as we explained earlier, is an over approximation of the substituted function that returns a non-deterministic value. By replacing the recursive call in both $P1$ and $P2$ with $UF$s that are defined as equal we have fulfilled the first part of the hypothesis. Then, all is left to do is prove the second part in order to prove the equivalence of $P1$ and $P2$. To Prove this equivalence, RVT generates a program calling both programs with the same non-deterministic input and asserts their output is equal as can be seen in figure \ref{fig:rvtmainprogram}.
+Less formally, this rule states that if  assuming that $P1$ and $P2$ produce the same output for the same input enables us to prove that the same input yields the same output upon executing $P1$ and $P2$ bodies, then the congruence relation between $P1$ and $P2$ (i.e., equal input results in equal output), holds. It was implemented by replacing recursive calls with calls to uninterrupted functions – $UF$s . An $UF$, as we explained earlier, is an over approximation of the substituted function that returns a non-deterministic value. By replacing the recursive call in both $P1$ and $P2$ with $UF$s that are defined as equal we have fulfilled the first part of the hypothesis. Then, all is left to do is prove the second part in order to prove the equivalence of $P1$ and $P2$. To Prove this equivalence, RVT generates a program calling both programs with the same non-deterministic input and asserts their output is equal as can be seen in figure \ref{fig:rvtmainprogram}.
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
