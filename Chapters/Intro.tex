@@ -13,9 +13,6 @@ TODO:Write about tools using symbolic execution such as ModDiff, CLEVER, DSE (Di
 
 It is worth mentioning that every verification tool such as SeaHorn \cite{DBLP:conf/cav/GurfinkelKKN15}, HSF(C) \cite{DBLP:conf/tacas/GrebenshchikovGLPR12} and Automizer \cite{DBLP:conf/cav/HeizmannHP13} can be used to prove equivalence between programs. It can be done by generating a new program which executes the given programs with the same non-deterministic input and asserts that their output is equal. However, this method does not take any advantage of any feature that the regression verification case offers. Both REVE and SYMDIFF perform better on closely related programs because they exploit the similarity to reduce the computational overhead. Since verification techniques run in an exponential complexity, using a regular verification tool without any optimization might yield insufficient results. 
 
-\section{Abstract Interpretation}
-Write about Abstract Interpretation
-
 \section{Weakest Precondition}
 \label{sec:wp}
 Write about Weakest Precondition \cite{10.1145/360933.360975}
