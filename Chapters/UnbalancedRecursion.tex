@@ -13,7 +13,7 @@ In this section we will study the problem of proving the equivalence of a pair o
 The reason that (PART-EQ) (see~\ref{eqn:parteq}) cannot prove equivalence of recursive functions that are not in sync, is that it abstracts the recursive calls with equivalent uninterpreted functions ($UFs$) \cite{DBLP:conf/dac/GodlinS09}, and those do not necessarily return the same value if called with different arguments, which is what happens if $f,f'$ are not in sync. In such a case the equivalence proof typically fails.
 Moreover, if the programs do not share the same base cases, (PART-EQ) fails as well, since for the same input value, in one side a base case is called and in the other a call is made to a UF, which returns a non-deterministic value.
 
-In the following subsection we will describe previous work\cite{DBLP:conf/fm/StrichmanV16} that attempted to deal with this problem, but only for a relatively simple case, in which there was a single recursive call in each of the two functions. In later subsections, we will extend the range of functions that can be proven to be equivalent, and also automate the process beyond what was suggested in \cite{DBLP:conf/fm/StrichmanV16}.
+In the following subsection we will describe previous work\cite{DBLP:conf/fm/StrichmanV16} that attempted to deal with this problem, but only for a relatively simple case, in which there was a single recursive call in each of the two functions. In later sections, we will extend the range of functions that can be proven to be equivalent, and also automate the process beyond what was suggested in \cite{DBLP:conf/fm/StrichmanV16}.
 
 \section{Prior Work: equivalence of unbalanced recursive functions with a single recursive call}
 \label{sec:prev}
@@ -22,11 +22,11 @@ Strichman and Veitsmann \cite{DBLP:conf/fm/StrichmanV16} proposed the following 
  {\frac {\text{BASE-EQUIV}(f,f') \:\text{STEP-EQUIV}(f,f')}{\text{PARTIAL-EQUIV}(f,f')}} 
   (\text{SEP-PART-EQ})
 \end{equation}
-This rule is based on domain partitioning: BASE-EQUIV$(f,f')$ proves equivalence for those inputs that invoke a base case in at least one of the two compared functions, and STEP-EQUIV$(f,f')$ proves equivalence for the other inputs, i.e., those that result in a recursive call on both sides.
+This rule is based on domain partitioning: (BASE-EQUIV) proves equivalence for those inputs that invoke a base case in at least one of the two compared functions, and (STEP-EQUIV) proves equivalence for the other inputs, i.e., those that result in a recursive call on both sides.
 
-BASE-EQUIV$(f,f')$ is implemented by blocking all the recursive calls on one side and increasingly unroll the second side until equivalence is proved or timeout is reached. This is done on both programs, and is considered successful if both are successful. The base-cases proof covers all the inputs that reach a base case on either function. More formally, let $in_B(f)$ be the set of inputs that drive $f$ to its base case, i.e., without a recursive (or mutual recursive) calls. Under this notation, BASE-EQUIV$(f,f')$ proves equivalence for the  inputs in $in_B(f) \cup in_B(f')$.
+(BASE-EQUIV) is implemented by blocking all the recursive calls on one side and increasingly unroll the second side until equivalence is proved or timeout is reached. This is done on both programs, and is considered successful if both are successful. The base-cases proof covers all the inputs that reach a base case on either function. More formally, let $in_B(f)$ be the set of inputs that drive $f$ to its base case, i.e., without a recursive (or mutual recursive) calls. Under this notation, (BASE-EQUIV) proves equivalence for the  inputs in $in_B(f) \cup in_B(f')$.
 
-Let $in_S(f)$ be the complement of $in_B(f)$, i.e. the set of inputs that reach at least one recursive call in $f$. STEP-EQUIV$(f,f')$ proves equivalence for $in_S(f) \cap in_S(f')$. To do so, the user manually specifies the unrolling that has to be done for the functions to be in sync, and RVT unwinds the recursions accordingly. The remaining recursive calls are replaced with $UFs$ as before, but reaching them increases a counter called UFs\_count. Then, the generated verification program asserts that the $UF$s counter is less than 2  (i.e., a base case was reached in at least one side), or the results upon execution with the same non-deterministic input are equal. 
+Let $in_S(f)$ be the complement of $in_B(f)$, i.e. the set of inputs that reach at least one recursive call in $f$. (STEP-EQUIV) proves equivalence for $in_S(f) \cap in_S(f')$. To do so, the user manually specifies the unrolling that has to be done for the functions to be in sync, and RVT unwinds the recursions accordingly. The remaining recursive calls are replaced with $UFs$ as before, but reaching them increases a counter called UFs\_count. Then, the generated verification program asserts that the $UF$s counter is less than 2  (i.e., a base case was reached in at least one side), or the results upon execution with the same non-deterministic input are equal. 
 
 \begin{figure}[h]
 \begin{center}
@@ -138,7 +138,7 @@ int f2(int n){
 \end{figure}
 Let us explore how (SEP-PART-EQ) applies to the function pair in figure \ref{fig:f1f2}.
 $f1$ is the classic Fibonacci function. $f2$ is similar to $f1$ except that the call  $f1(n-1)$ was unrolled once. As can be seen in figure \ref{fig:f1f2cgunrolled}, after unrolling the same call on $f1$, $f1$ and $f2$ reaches the same related calls. Unrolling a recursion results in a new recursion that advances on the call graph differently. Hence, to preserve the equivalence, $f2$'s base case was fixed to include the input $n=2$ (otherwise it would have been skipped over and $f2(2)$ would yield a different result from $f1(2)$). 
-For the base case proof, $in_B(f1) = {n \leq 1}$ and  $in_B(f2) = {n \leq 2}$, and so $in_B(f1) \cup in_B(f2) = {n \leq 2} $. BASE-EQUIV$(f1,f2)$ would have determined the pair to be partial equivalent for ${n \leq 2}$ as expected. On the other hand, the step case cannot be proven with any unrolling, because of the $n=2$ case. This happens because the condition of $UFs\_count < 2$ is not strong enough to exclude cases in which some but not all recursive calls are made.
+For the base case proof, $in_B(f1) = {n \leq 1}$ and  $in_B(f2) = {n \leq 2}$, and so $in_B(f1) \cup in_B(f2) = {n \leq 2} $. (BASE-EQUIV) would have determined the pair to be partial equivalent for ${n \leq 2}$ as expected. On the other hand, the step case cannot be proven with any unrolling, because of the $n=2$ case. This happens because the condition of $UFs\_count < 2$ is not strong enough to exclude cases in which some but not all recursive calls are made.
 
 \begin{figure}
 \begin{minipage}{.2\textwidth}
@@ -215,13 +215,13 @@ int g2(int n){
 \label{fig:g1g2neq}
 \end{center}
 \end{figure}
-$g2$ diverges from $g1$ on $n=2$ as $g1(2) = 1$, and $g2(2) = 0$. In fact $g1$ and $g2$ are not equivalent for \{$n | n = 2 \wedge n \geq 4$\}. BASE-EQUIV$(g1,g2)$ will cover the inputs in $in_B(g1) \cup in_B(g2) = {n \leq 1}$. A step-case proof that considers the first two issues, as stated above, sync-unrolls the call $g1(n-1)$ once, and modifies the condition of the $UFs\_count$ to reach all six recursive calls (2 were created by unrolling $g1(n-1)$). It is easy to see that only for $n \geq 3$ all the recursive calls are reached. As we can see, $n = 2$ was left unproved and has to be addressed to maintain soundness. 
+$g2$ diverges from $g1$ on $n=2$ as $g1(2) = 1$, and $g2(2) = 0$. In fact $g1$ and $g2$ are not equivalent for \{$n | n = 2 \wedge n \geq 4$\}. (BASE-EQUIV) will cover the inputs in $in_B(g1) \cup in_B(g2) = {n \leq 1}$. A step-case proof that considers the first two issues, as stated above, sync-unrolls the call $g1(n-1)$ once, and modifies the condition of the $UFs\_count$ to reach all six recursive calls (2 were created by unrolling $g1(n-1)$). It is easy to see that only for $n \geq 3$ all the recursive calls are reached. As we can see, $n = 2$ was left unproved and has to be addressed to maintain soundness. 
 
-One may suggest addressing the gap set by applying the sync-unrolling before executing the BASE-EQUIV proof. The problem with this method is that the gap traces might not reach any of the original base cases of both programs, as we can see in the example in figure \ref{fig:g1g2neq} for $n=2$. By blocking the recursive calls on each side, BASE-EQUIV prunes all the inputs that do not reach a base case on at least one side, including the gap's traces, and therefore this attempt is futile.
-Nevertheless, we can extend the core idea of BASE-EQUIV to accomplish this as well. Essentially, BASE-EQUIV consists of two phases. In each phase RVT blocks the recursive calls of the relevant side and thus left only with the traces that reach this side's base cases. Then, RVT unrolls the other side until equivalence  is proven or timeout is reached. The first part of each phase is used to restrict the input space, and the other part is driven from the understanding that the base cases of equivalent functions are not so far apart, i.e., they require a small amount of unwinding to be proven equivalent. This method could work to prove equivalence for the gap set, but we need to adjust the restriction to include the gap's inputs as well. To do so we will apply the sync-unrolling and generate the base case preconditions of both programs (described in section \ref{sec:findsyncunrolling}), and their disjunction is the constraint that includes the input of the gap case and the base case (note that this is not necessarily the $Weakest\ Precondition$ \cite{10.1145/360933.360975} as the path predicates from the concolic execution may contain redundant clauses). \crjs{this is actually the wp as it is defined semantically regardless to the number of clauses it uses}
+One may suggest addressing the gap set by applying the sync-unrolling before executing the (BASE-EQUIV) proof. The problem with this method is that the gap traces might not reach any of the original base cases of both programs, as we can see in the example in figure \ref{fig:g1g2neq} for $n=2$. By blocking the recursive calls on each side, (BASE-EQUIV) prunes all the inputs that do not reach a base case on at least one side, including the gap's traces, and therefore this attempt is futile.
+Nevertheless, we can extend the core idea of (BASE-EQUIV) to accomplish this as well. Essentially, (BASE-EQUIV) consists of two phases. In each phase RVT blocks the recursive calls of the relevant side and thus left only with the traces that reach this side's base cases. Then, RVT unrolls the other side until equivalence  is proven or timeout is reached. The first part of each phase is used to restrict the input space, and the other part is driven from the understanding that the base cases of equivalent functions are not so far apart, i.e., they require a small amount of unwinding to be proven equivalent. This method could work to prove equivalence for the gap set, but we need to adjust the restriction to include the gap's inputs as well. To do so we will apply the sync-unrolling and generate the base case preconditions of both programs as described in section \ref{sec:findsyncunrolling}, and their disjunction is the constraint that includes the input of the gap case and the base case. Note that those preconditions are actually the $Weakest\ Precondition$ \cite{10.1145/360933.360975} for the function to reach only the gap and base cases, as the path predicates from the concolic execution are generated this way by definition.
 Hereafter, we will use the term $Extended\ Base\ Cases$ to state all the traces that reach the base cases and the gap cases combined. 
 
-We propose here a new proof rule MRC-PART-EQ. We will elaborate on the premises EXT-BASE-EQUIV and MRC-STEP-EQUIV in the next sections.
+We propose here a new proof rule (MRC-PART-EQ). We will elaborate on the premises (EXT-BASE-EQUIV) and (MRC-STEP-EQUIV) in the next sections.
 \begin{equation}
  {\frac {\text{EXT-BASE-EQUIV}(f_1,f_2) \:\text{MRC-STEP-EQUIV}(f_1,f_2)}{\text{PARTIAL-EQUIV}(f_1,f_2)}} 
   (\text{MRC-PART-EQ})
@@ -230,7 +230,7 @@ We propose here a new proof rule MRC-PART-EQ. We will elaborate on the premises 
 Given a unrolling \emph{su} that synchronizes the functions, (EXT-BASE-EQUIV) prove the conditional equivalence for the extended base case, whereas (MRC-STEP-EQUIV) prove the equivalence of the the step cases. We will now present our method to automatically generate such an unrolling, and then move on to describe (EXT-BASE-EQUIV) and (MRC-STEP-EQUIV).
 
 
-\section{Automatic synchronization of recursive functions}
+\section{Automatic Synchronization of Recursive Functions}
 %\subsection{The Need To Automatically Synchronize Functions}
 To prove equivalence for recursive functions, RVT needs to unroll them so they will be in sync. The motivation for automating the process of finding such an unrolling is clear, and will become even more evident later in the chapter when we consider more complicated cases, in which more involved rules will be presented, for functions with multiple recursive calls. 
 
@@ -441,9 +441,9 @@ assert(recorded_n1 != recorded_n2)
 After unwinding $P$ enough times CBMC will find a counterexample for any n bigger than 2, from which \alg{GenerateSynchronizingUnrolling} derives the sync-unrolling shown in figure \ref{fig:f1f2cgunrolled}.
 
 
-\section{EXT-BASE-EQUIV - Proving Extended Base Cases Equivalence}
+\section{(EXT-BASE-EQUIV) - Proving Extended Base Cases Equivalence}
 \label{sec:EXT-BASE-EQUIV}
-To prove EXT-BASE-EQUIV, RVT generates a verification program that represents the equivalence we want to prove. The composition of such a program is depicted in algorithm  \ref{alg:ExtendedBaseProof}.
+To prove (EXT-BASE-EQUIV), RVT generates a verification program that represents the equivalence we want to prove. The composition of such a program is depicted in algorithm  \ref{alg:ExtendedBaseProof}.
 
 \noindent
 \begin{algorithm}
@@ -482,7 +482,7 @@ assert(res1==res2)
 \end{figure}
 In fact, we restrict the notation of equivalence to conditional equivalence as Kawaguchi et al. described in their work in \cite{kawaguchi2010conditional}. That is, to prove the equivalence for the extended base cases we will prove the equivalence of the pair only on inputs that satisfy $bcpc_1 \lor bcpc_2$. Symbolic Execution is used to verify $P$. If the verification task is successful then RVT will deem the extended base case equivalence of the pair as correct. 
 
-\subsection{Comparing methods to prove the extended base cases equivalence}
+\subsection{Comparing Methods to Prove the Extended Base Cases Equivalence}
 We choose to use the Symbolic Execution method to prove the extended base cases equivalence due to complexity reasons. We will compare here the complexity of two alternatives. The first is using CBMC and increasing the unrolling factor until the verification is successful or timeout is reached. The second is using Symbolic Execution. It is important to note that we aim to compare the method's asymptotic complexity rather than their exact complexity, and the discussion will be held accordingly.  
 
 Assume that we try to prove the said equivalence of two programs $P_1$ and $P_2$ and that at least one of them contains two or more recursive calls in its body that are executed on the same trace. Let $C$ be that number. Without loss of generality, assume that the equivalence is proved when $P_1$ is unrolled $k$ times. Therefore we can conclude that $C > 1$ and $k \geq 0$. Let $n$ be the syntactic size of $P_1$ and $P_2$ that includes their variables and functions. 
@@ -496,7 +496,7 @@ On the other hand, using Symbolic Execution, the size of the formula is bounded 
 Hence using symbolic execution for this task has better performances than the CBMC based method mentioned above.
 
 
-\section{MRC-STEP-EQUIV - Proving Step Case Equivalence}
+\section{(MRC-STEP-EQUIV) - Proving Step Case Equivalence}
 \label{sec:MRC-STEP-EQUIV}
 \noindent
 \begin{algorithm}
@@ -534,14 +534,14 @@ assert(res1==res2)
 \end{center}
 \end{figure}
 
-\subsection{The soundness of MRC-PART-EQ}
+\subsubsection{The Soundness of (MRC-PART-EQ)}
 \label{sec:MRCsoundness}
-In EXT-BASE-EQUIV, RVT tries to prove equivalence for all the traces that do not reach a recursive call on one of the functions. In MRC-STEP-EQUIV, RVT tries to prove equivalence for the complementary group of EXT-BASE-EQUIV's inputs. By definition, EXT-BASE-EQUIV's and MRC-STEP-EQUIV's input domain cover together all the possible inputs. MRC-PART-EQ requires both EXT-BASE-EQUIV and MRC-STEP-EQUIV to be equivalent for the proof to hold, and hence it is sound.
+In (EXT-BASE-EQUIV), RVT tries to prove equivalence for all the traces that do not reach a recursive call on one of the functions. In (MRC-STEP-EQUIV), RVT tries to prove equivalence for the complementary group of (EXT-BASE-EQUIV)'s inputs. By definition, (EXT-BASE-EQUIV)'s and (MRC-STEP-EQUIV)'s input domain cover together all the possible inputs. (MRC-PART-EQ) requires both EXT-BASE-EQUIV and (MRC-STEP-EQUIV) to be equivalent for the proof to hold, and hence it is sound.
 
 
 \section{Proving Equivalence For Complex Step Recursions}
 \label{sec:multistep}
-\subsection{Applying MRC-PART-EQ on Complex Step Recursions}
+\subsection{Applying (MRC-PART-EQ) on Complex Step Recursions}
 For the following discussion we will first define what is a complex step recursion:
 \begin{definition}[Complex Step]
 The step case of a recursion is a \emph{Complex Step} if its control flow contains two or more paths.
@@ -574,14 +574,12 @@ int h2(int n){
 \label{fig:f1f2cond}
 \end{center}
 \end{figure}
-For $n\leq 1$ both functions behave the same. For $n=2$, $n$ is even and thus the same related recursive calls are executed on both sides. As we have seen in the example from figure \ref{fig:f1f2}, for $n\geq3$ the two possible steps are interchangeable for calculating the Fibonacci sequence. Nevertheless, MRC-PART-EQ cannot find a useful sync-unrolling to prove equivalence for this pair, because in fact here a different unrolling is necessary for different traces.
-\os{show here how partitioning of the domain, each with its own sync-unrollings, solves this problem, for this example. }
-In the next subsection we will show how to partition the domain such that each partition induces a single trace of the program, thus solving this problem. 
+For $n\leq 1$ both functions behave the same. For $n=2$, $n$ is even and thus the same related recursive calls are executed on both sides. As we have seen in the example from figure \ref{fig:f1f2}, for $n\geq3$ the two possible steps are interchangeable for calculating the Fibonacci sequence. Nevertheless, (MRC-PART-EQ) cannot find a useful sync-unrolling to prove equivalence for this pair. The way algorithm \ref{alg:Findunrolling} works, RVT finds a specific input for which all the recursive calls have related calls. In our example, \alg{FindSyncUnrolling} can pick $n=3$, and the sync-unrolling will be to unroll the call $h1(n-1)$ once and block every other call (including the calls in the unrolled instance of $h1$) on both sides. Unfortunately, when trying to prove step case equivalence, RVT will generate counterexamples for even values of $n$, as for those values $h2(n-1)$ have no related call of on $h1$ (because $h1(n-1)$ is unrolled). We understand here that we need a proof strategy that can deal with odd and even values of $n$. More generally, proving equivalence for recursion with complex rules should address different paths on the steps, because unlike simple steps, a sync-unrolling that works for one path in a complex step isn't necessarily the one needed to prove another path.
 
-\os{consider whether the following is necessary:}
-Furthermore, to compute the base-case precondition for the extended base case in EXT-BASE-EQUIV, we heavily rely on the total recursive calls coverage due to the assumption that the step case is the path where all those calls are invoked, and anything below is the gap case or the base case. This assumption is dismissed when dealing with complex steps, as no trace can reach all the recursive calls in a single path.
+In the next subsection we will show how to partition the domain such that each partition induces a single trace of the program, thus addressing only a single path on each function's step, and solving this problem. 
 
-\subsection{Proving equivalence of complex-step recursive functions}
+
+\subsection{Proving Equivalence of Complex-Step Recursive Functions}
 Given two functions as described in the previous subsection, we would like to decompose them to multiple functions such that each of them has a simple step. We will then prove the equivalence of each such pair of functions. For this purpose we will use path predicates to divide the input domain. Formally, let $CF(f)$ be the set of all the paths in the control flow of the top frame of a function $f$. Let $in(p)$ denote all the inputs that their traces go through the path $p$, $f|_a$ denote the function $f$ with an assumption $a$ restricting its inputs, and $base(f_1,f_2)=in_B(f_1) \cup in_B(f_2)$ ($in_B(f)$ was described in section \ref{sec:prev}).
 Based on this notation, we define the proof rule CS-PART-EQ:
 
@@ -589,7 +587,7 @@ Based on this notation, we define the proof rule CS-PART-EQ:
 {\frac{
   \bigwedge_{p_1\in CF(f_1)}\bigwedge_{p_2\in CF(f_2)}\text{MRC-PART-EQ}(f_1|_{base(f_1,f_2) \cup in(p_1)},f_2|_{base(f_1,f_2) \cup in(p_2)})}{\text{PARTIAL-EQUIV}(f_1,f_2)}}\text{(CS-PART-EQ)}
 \end{equation}
-If we omit the base cases ($base(f_1,f_2)$), either EXT-BASE-EQUIV and BASE-EQUIV would have been vacuously true for any path of the step cases. By including the base cases to each pair of step cases we can use MRC-PART-EQ without any changes and sustain its soundness. CS-PART-EQ covers all the possible pairs of paths, and due to its exhaustive nature and the fact that for each pair of recursions MRC-PART-EQ is sound (as shown in \ref{sec:MRCsoundness}), we can conclude that CS-PART-EQ is sound as well.
+If we omit the base cases ($base(f_1,f_2)$), either (EXT-BASE-EQUIV) and (BASE-EQUIV) would have been vacuously true for any path of the step cases. By including the base cases to each pair of step cases we can use (MRC-PART-EQ) without any changes and sustain its soundness. (CS-PART-EQ) covers all the possible pairs of paths, and due to its exhaustive nature and the fact that for each pair of recursions (MRC-PART-EQ) is sound (as shown in \ref{sec:MRCsoundness}), we can conclude that (CS-PART-EQ) is sound as well.
 
 \begin{algorithm}
 \begin{minipage}{\linewidth}
@@ -625,7 +623,7 @@ If we omit the base cases ($base(f_1,f_2)$), either EXT-BASE-EQUIV and BASE-EQUI
 \end{algorithm}
 
 Algorithm~\ref{alg:provemcr} shows 
-\alg{ProveComplexStepsRecursions}, which checks the premise of CS-PART-EQ. It partitions the input domain of the two input functions, such that each partition corresponds to a separate path in their flattened version, as explained above. It then tries to prove the equivalence of each pair of such partitions. The main elements of the algorithm are: 
+\alg{ProveComplexStepsRecursions}, which checks the premise of (CS-PART-EQ). It partitions the input domain of the two input functions, such that each partition corresponds to a separate path in their flattened version, as explained above. It then tries to prove the equivalence of each pair of such partitions. The main elements of the algorithm are: 
 \begin{itemize}
     \item In line~\ref{step:getallpaths},
     \alg{GetAllPaths($f$)} uses \emph{concolic execution} to get all the paths in the top frame of $f$. To that end, \alg{GetAllPaths} flattens $f$ by replacing recursive calls with calls to empty functions, i.e., functions that have a single $return$ statement and nothing else, and calls PathCrawler \cite{10.1007/11408901_21}. PathCrawler generates a list of path conditions for all the possible paths in that flattened version of $f$.  
@@ -651,8 +649,8 @@ assert(false)
 \end{center}
 \end{figure}
 
-\subsection{A demonstration of the incompleteness of CS-PART-EQ}
-Although CS-PART-EQ can prove a range of use cases with multiple parameters and various variables types, in this section we will discuss some of its limitations.
+\subsection{Exploring the Incompleteness of (CS-PART-EQ)}
+Although (CS-PART-EQ) can prove a range of use cases with multiple parameters and various variables types, in this section we will discuss some of its limitations.
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
