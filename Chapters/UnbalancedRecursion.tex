@@ -650,7 +650,7 @@ assert(false)
 \end{figure}
 
 \subsection{Exploring the Incompleteness of (CS-PART-EQ)}
-Although (CS-PART-EQ) can prove a range of use cases with multiple parameters and various variables types, in this section we will discuss some of its limitations.
+(CS-PART-EQ) can prove a range of use cases with multiple parameters and various variables types. To the best of our knowledge, no existing tools can prove the equivalence of the programs in figures \ref{fig:f1f2} and \ref{fig:f1f2cond}. Symbolic execution based tools such as CLEVER \crjs{add ref} and ARDiff \crjs{add ref} are can not handle unbounded loops, while other dominant tools in this area such as REVE \crjs{add ref}, fail to prove those as well. We have also tried to create a simple verification task such as in figure \ref{fig:rvtmainprogram} and use state-of-the-art model checkers such as \crjs{fill this list}, and they failed as well. Nevertheless, in this section we will discuss some of (CS-PART-EQ) limitations.
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
@@ -687,14 +687,87 @@ int m2(int n, int switch_mode) {
 \end{figure}
 
 
-1. Consider the pair in figure \ref{fig:f1f2switch}. As we have seen throughout this chapter, the steps are equivalent for $n > 3$ and $n=2$ is handled in m2's base case and so this pair is equivalent. For the case where switch\_mode is true, RVT generates a sync-unrolling that unrolls the call m1(n-1,!do\_nothing) once, as we would expect. When trying to prove the related step case, CBMC will fail. This happens because in the added unrolled frame the polarity of do\_nothing is negated to the polarity of switch\_mode in the related calls due to the odd number of unrolling, and as a consequence there won't be related uninterpreted functions that the SAT solver could compare, even though that do\_nothing does not affect m1 results.
+1. Consider the pair in figure \ref{fig:f1f2switch}. As we have seen throughout this chapter, the steps are equivalent for $n > 3$, $m2$'s base case handles $n=2$ and thus this pair is equivalent. For the case where $switch\_mode$ is true, RVT generates a sync-unrolling that unrolls the call $m1(n-1,!do\_nothing)$ once and block everything else. When trying to prove the related step case, CBMC will fail. This happens because in the unrolled frame the polarity of $do\_nothing$ is negated to the polarity of $switch\_mode$ in the related calls due to the odd number of unrolling, and as a consequence there won't be related uninterpreted functions that the SAT solver used by RVT could compare, even though that $do\_nothing$ does not affect $m1$'s result.
 
-Talk about:
-1. Switch case example
-2. Redundant recursive calls that defect the sync-unrolling generation
-3. Mutual recursion
+Tיhis can be resolved by using static analysis to track unused variables and then adjust their value to be equivalent to the argument sent to the uninterpreted functions on the other side. That way, only parameters that affect the results of each side is taken into account in the proof.
 
 
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{7 cm}
+\begin{lstlisting}
+int p1(int n) {
+    if (n < 1) return 0;
+    if (n == 1) return 1;
+    return p1(n - 1) 
+         + p1(n - 2);
+}
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}{7 cm}
+\begin{lstlisting}
+int p2(int n){
+   if (n < 1) return 0;
+   if (n == 1 || n == 2) return 1; 
+  int results = 0;
+  int r1 = p2(n-1);
+  int r2 = p2(n-2);
+  int r3 = p2(n-3);
+   if (n % 2 == 0)
+        results = r2 + r2 + r3;
+   if (n % 2 == 1)
+        results = r1 + r2;
+  return results;
+}
+\end{lstlisting}
+\end{minipage}
+\caption{Equivalent implementations of Fibonacci. p2 alternates between two paths in the control flow but do the recursive calls once.}
+\label{fig:redundentcalls}
+\end{center}
+\end{figure}
+
+2. Consider the pair in figure \ref{fig:redundentcalls}. In this examples, the values in $p2$ are calculated in advance, and are used differently according to the parity of $n$. The problem occur when RVT tries to generate a sync unrolling and one of the recursive calls is redundant (e.g. the result of that recursive call is not used). Algorithm \ref{alg:Findunrolling} aims to find a value for which all the recursive calls have related calls. To achieve that, each recursive calls on each side is either recorded, unrolled or is not reached. The redundant calls in $p2$ are not on a branched path and therefore must be executed, can't be recorded as there is no equivalent recording on $p1$ and unrolling them will yield in more redundant calls. Whenever RVT fails to generate a sync unrolling, a default one is used (blocking every recursive call) and it is not enough to prove the equivalence of this pair.
+
+The solution is to determine in advance which recursive calls affect the current path and eliminate the rest. This can be done using static analysis techniques. but the execution of this idea is not trivial and requires further thinking.
+
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{7 cm}
+\begin{lstlisting}
+int q1(int n) {
+    if (n < 1) return 0;
+    if (n == 1) return 1;
+    return q1(n - 1) 
+         + q1(n - 2);
+}
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}{7 cm}
+\begin{lstlisting}
+
+int q2_aux(int n){
+        return q2(n-2) + q2(n-2)
+        + q2(n-3);
+}
+
+int q2(int n){
+   if (n < 1) return 0;
+   if (n == 1 || n == 2) return 1; 
+   if (n % 2 == 0)
+        return q2_aux(n);
+   if (n % 2 == 1)
+        return q2(n-1) + q2(n-2);
+}
+\end{lstlisting}
+\end{minipage}
+\caption{Equivalent implementations of Fibonacci. $q2$ have a mutual recursion with $q2\_aux$.}
+\label{fig:mutualrecursion}
+\end{center}
+\end{figure}
+
+3. Consider $q1$ and $q2$ in figure \ref{fig:mutualrecursion}. This implementation is clearly equivalent to the one in figure \ref{fig:f1f2cond}, but using $q2\_aux$ creates a mutual recursion which (CS-PART-EQ) does not handle. Previous work on RVT tackled this issue (\cite{DBLP:conf/dac/GodlinS09} and \cite{DBLP:conf/fm/StrichmanV16}) using the idea of finding a cut in the strongly connected component in the call graph such that all the recursive calls are cut, and inline the functions accordingly.
+
+Those technique should be implemented in (CS-PART-EQ) to improve the completeness.
 
 
 
