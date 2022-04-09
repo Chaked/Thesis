@@ -227,7 +227,7 @@ We propose here a new proof rule (MRC-PART-EQ). We will elaborate on the premise
   (\text{MRC-PART-EQ})
 \end{equation}
 
-Given a unrolling \emph{su} that synchronizes the functions, (EXT-BASE-EQUIV) prove the conditional equivalence for the extended base case, whereas (MRC-STEP-EQUIV) prove the equivalence of the the step cases. We will now present our method to automatically generate such an unrolling, and then move on to describe (EXT-BASE-EQUIV) and (MRC-STEP-EQUIV).
+Given a unrolling \emph{su} that synchronizes the functions, (EXT-BASE-EQUIV) prove conditional equivalence for the extended base case, whereas (MRC-STEP-EQUIV) prove the equivalence of the the step cases. We will now present our method to automatically generate such an unrolling, and then move on to describe (EXT-BASE-EQUIV) and (MRC-STEP-EQUIV).
 
 
 \section{Automatic Synchronization of Recursive Functions}
@@ -536,7 +536,7 @@ assert(res1==res2)
 
 \subsubsection{The Soundness of (MRC-PART-EQ)}
 \label{sec:MRCsoundness}
-In (EXT-BASE-EQUIV), RVT tries to prove equivalence for all the traces that do not reach a recursive call on one of the functions. In (MRC-STEP-EQUIV), RVT tries to prove equivalence for the complementary group of (EXT-BASE-EQUIV)'s inputs. By definition, (EXT-BASE-EQUIV)'s and (MRC-STEP-EQUIV)'s input domain cover together all the possible inputs. (MRC-PART-EQ) requires both EXT-BASE-EQUIV and (MRC-STEP-EQUIV) to be equivalent for the proof to hold, and hence it is sound.
+In (EXT-BASE-EQUIV), RVT tries to prove equivalence for all the traces that do not reach a recursive call on one of the functions. In (MRC-STEP-EQUIV), RVT tries to prove equivalence for the complementary group of (EXT-BASE-EQUIV)'s inputs. By definition, (EXT-BASE-EQUIV)'s and (MRC-STEP-EQUIV)'s input domain cover together all the possible inputs. (MRC-PART-EQ) requires both (EXT-BASE-EQUIV) and (MRC-STEP-EQUIV) to be equivalent for the proof to hold, and hence it is sound.
 
 
 \section{Proving Equivalence For Complex Step Recursions}
@@ -570,7 +570,7 @@ int h2(int n){
 }
 \end{lstlisting}
 \end{minipage}
-\caption{Equivalent implementations of Fibonacci, whereas h2 has a complex step. $n \& 1$ check the parity of $n$ using the AND bitwise operation.}
+\caption{Equivalent implementations of Fibonacci, whereas h2 has a complex step. $n \& 1$ check the parity of $n$ using the AND bitwise operator.}
 \label{fig:f1f2cond}
 \end{center}
 \end{figure}
@@ -610,7 +610,7 @@ If we omit the base cases ($base(f_1,f_2)$), either (EXT-BASE-EQUIV) and (BASE-E
 	\State $BaseCaseEquiv$ = \alg{ProveExtendedBaseCasesProof}($f_{pruned}^1,f_{pruned}^2,su$) 
 	\State \label{step:provestepincs} $StepCaseEquiv$ = 	\alg{ProveStepCaseEquivalence}($f_{pruned}^1,f_{pruned}^2,su,bcpc_1\lor bcpc_2$)
  \If{ \label{step:false}
-	(!( BaseCaseEquiv $\wedge$ StepCaseEquiv)}
+	!( BaseCaseEquiv $\wedge$ StepCaseEquiv)}
 	\State \Return FALSE; 
 	\EndIf
 	\EndFor
@@ -632,7 +632,7 @@ Algorithm~\ref{alg:provemcr} shows
     
     \item As of line~\ref{step:addassumption}, for each feasible pair of paths predicates, RVT treats the programs as though they had a single step by restricting the inputs and tries to prove them with \alg{ProveExtendedBaseCasesProof} and \alg{ProveStepCaseEquivalence} from sections \ref{sec:EXT-BASE-EQUIV} and \ref{sec:MRC-STEP-EQUIV}, respectively. \alg{AddAssumption} in those algorithms deviates from how is was originally described. Rather than just adding the assumptions, it replaces the assumptions added in algorithm \ref{alg:provemcr} in lines~\ref{step:assmp1} and~\ref{step:assmp2}. Otherwise, when blocking the base cases for example, we will assume contradicting assumptions and the verification task would be vacuously true. The formula $bcpc_1\lor bcpc_2$ in line \ref{step:provestepincs} is computed as part of  \alg{ProveExtendedBaseCasesProof} in the line above. 
     
-    \item In line~\ref{step:false}, we return False (i.e., we failed proving that $f_1$ and $f_2$ are equivalent), if we failed proving equivalent one of the pairs. 
+    \item In line~\ref{step:false}, we return False (i.e., we failed proving that $f_1$ and $f_2$ are equivalent), if we failed proving equivalence for one of the pairs. 
 \end{itemize}
 
 \begin{figure} [h]
@@ -650,7 +650,7 @@ assert(false)
 \end{figure}
 
 \subsection{Exploring the Incompleteness of (CS-PART-EQ)}
-(CS-PART-EQ) can prove a range of use cases with multiple parameters and various variables types. To the best of our knowledge, no existing tools can prove the equivalence of the programs in figures \ref{fig:f1f2} and \ref{fig:f1f2cond}. Symbolic execution based tools such as CLEVER \crjs{add ref} and ARDiff \crjs{add ref} are can not handle unbounded loops, while other dominant tools in this area such as REVE \crjs{add ref}, fail to prove those as well. We have also tried to create a simple verification task such as in figure \ref{fig:rvtmainprogram} and use state-of-the-art model checkers such as \crjs{fill this list}, and they failed as well. Nevertheless, in this section we will discuss some of (CS-PART-EQ) limitations.
+(CS-PART-EQ) can prove a range of use cases with multiple parameters and various variables types. To the best of our knowledge, no existing tools can prove the equivalence of the programs in figures \ref{fig:f1f2} and \ref{fig:f1f2cond}. Symbolic execution based tools such as CLEVER \cite{9285657} and ARDiff \cite{10.1145/3368089.3409757} can not handle unbounded loops, while another dominant tool in this area - REVE \cite{FelsingGrebingKlebanov2014}, fails to prove those as well. We have also tried to create a simple verification task such as in figure \ref{fig:rvtmainprogram} and use state-of-the-art model checkers which performed the best in the 2022 software verification competition SV-COMP 2022 \cite{10.1007/978-3-030-99527-0_20}: CPAchecker \cite{10.1007/978-3-642-22110-1_16}, Ultimate Automizer \cite{10.1007/978-3-319-89963-3_30} and Symbiotic \cite{inbook}, and they failed as well. Nevertheless, in this section we will discuss some of (CS-PART-EQ) limitations.
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
@@ -687,9 +687,9 @@ int m2(int n, int switch_mode) {
 \end{figure}
 
 
-1. Consider the pair in figure \ref{fig:f1f2switch}. As we have seen throughout this chapter, the steps are equivalent for $n > 3$, $m2$'s base case handles $n=2$ and thus this pair is equivalent. For the case where $switch\_mode$ is true, RVT generates a sync-unrolling that unrolls the call $m1(n-1,!do\_nothing)$ once and block everything else. When trying to prove the related step case, CBMC will fail. This happens because in the unrolled frame the polarity of $do\_nothing$ is negated to the polarity of $switch\_mode$ in the related calls due to the odd number of unrolling, and as a consequence there won't be related uninterpreted functions that the SAT solver used by RVT could compare, even though that $do\_nothing$ does not affect $m1$'s result.
+1. Consider the pair in figure \ref{fig:f1f2switch}. As we have seen throughout this chapter, the steps are equivalent for $n > 3$, $m2$'s base case handles $n=2$ and thus this pair is equivalent. For the case where $switch\_mode$ is true, RVT generates a sync-unrolling that unrolls the call $m1(n-1,!do\_nothing)$ once and block everything else on both sides. When trying to prove the related step case, CBMC fails. This happens because in the unrolled frame the polarity of $do\_nothing$ is negated to the polarity of $switch\_mode$ in the related calls due to the odd number of unrolling, and as a consequence there won't be related uninterpreted functions to the recursive calls in the unrolled frame of $m1$ that the SAT solver used by RVT could compare, even though $do\_nothing$ does not affect $m1$'s result.
 
-Tיhis can be resolved by using static analysis to track unused variables and then adjust their value to be equivalent to the argument sent to the uninterpreted functions on the other side. That way, only parameters that affect the results of each side is taken into account in the proof.
+Tיhis can be resolved by using static analysis to track unused variables and then adjust their value to be equivalent to the argument sent to the uninterpreted functions on the other side. That way, only parameters that affect the results of each side are taken into account in the proof.
 
 
 \begin{figure}[h]
@@ -726,9 +726,9 @@ int p2(int n){
 \end{center}
 \end{figure}
 
-2. Consider the pair in figure \ref{fig:redundentcalls}. In this examples, the values in $p2$ are calculated in advance, and are used differently according to the parity of $n$. The problem occur when RVT tries to generate a sync unrolling and one of the recursive calls is redundant (e.g. the result of that recursive call is not used). Algorithm \ref{alg:Findunrolling} aims to find a value for which all the recursive calls have related calls. To achieve that, each recursive calls on each side is either recorded, unrolled or is not reached. The redundant calls in $p2$ are not on a branched path and therefore must be executed, can't be recorded as there is no equivalent recording on $p1$ and unrolling them will yield in more redundant calls. Whenever RVT fails to generate a sync unrolling, a default one is used (blocking every recursive call) and it is not enough to prove the equivalence of this pair.
+2. Consider the pair in figure \ref{fig:redundentcalls}. In this examples, the values in $p2$ are calculated in advance, and are used differently according to the parity of $n$. The problem occur when RVT tries to generate a sync unrolling and one of the recursive calls is redundant (e.g. the result of that recursive call is not used). Algorithm \ref{alg:Findunrolling} aims to find a value for which all the recursive calls have related calls. To achieve that, each recursive calls on each side is either recorded, unrolled or is not reached. The redundant calls in $p2$ are not on a branched path and therefore must be executed, can't be recorded as there is no equivalent recording for them in $p1$ and unrolling them will yield in more redundant calls. Whenever RVT fails to generate a sync unrolling, a default one is used (blocking every recursive call) and it is not enough to prove the equivalence of this pair.
 
-The solution is to determine in advance which recursive calls affect the current path and eliminate the rest. This can be done using static analysis techniques. but the execution of this idea is not trivial and requires further thinking.
+The solution is using static analysis to determine in advance which recursive calls affect the current path and eliminate the rest if possible. The execution of this idea is not trivial and requires further thinking, as a call might be redundant on one frame and executed in a deeper frame.
 
 \begin{figure}[h]
 \begin{center}
@@ -765,9 +765,9 @@ int q2(int n){
 \end{center}
 \end{figure}
 
-3. Consider $q1$ and $q2$ in figure \ref{fig:mutualrecursion}. This implementation is clearly equivalent to the one in figure \ref{fig:f1f2cond}, but using $q2\_aux$ creates a mutual recursion which (CS-PART-EQ) does not handle. Previous work on RVT tackled this issue (\cite{DBLP:conf/dac/GodlinS09} and \cite{DBLP:conf/fm/StrichmanV16}) using the idea of finding a cut in the strongly connected component in the call graph such that all the recursive calls are cut, and inline the functions accordingly.
+3. Consider $q1$ and $q2$ in figure \ref{fig:mutualrecursion}. This implementation is clearly equivalent to the one in figure \ref{fig:f1f2cond}, but using $q2\_aux$ creates a mutual recursion which (CS-PART-EQ) does not handle. Previous work on RVT tackled this issue (\cite{DBLP:conf/dac/GodlinS09} and \cite{DBLP:conf/fm/StrichmanV16}) using the idea of finding a sub-map in the strongly connected component of the recursions in the call graph that intersect all cycles, and replacing calls with uninterpreted functions only if they are to functions in the sub-map.
 
-Those technique should be implemented in (CS-PART-EQ) to improve the completeness.
+Those technique should be implemented in (CS-PART-EQ) to support mutual recursion.
 
 
 
