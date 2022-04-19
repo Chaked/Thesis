@@ -53,7 +53,7 @@ All we have seen so far did not take any advantage of the similarity between the
     \Else
       \State \label{step:select}Select nondeterministically a set of function pairs \newline \mbox{~~~~~~~~~~~~~~~~~} $S \subseteq \{\pair{f,f'}\mid \pair{f,f'} \in$ $map_f, f \in m_1, f' \in m_2\}$ that intersect all cycles in $m_1$ and $m_2$;
       \For {all $\pair{f,f'} \in S$}\label{step:forall}
-        \If  {$\lnot\alg{oldCheck^r}(f,f',S)$} 
+        \If  {$\lnot\alg{Check^r}(f,f',S)$} 
         \label{step:abort}{abort;} 
         \EndIf
       \EndFor
@@ -66,7 +66,7 @@ All we have seen so far did not take any advantage of the similarity between the
 \EndFunction
 \end{algorithmic}
 \caption{A bottom-up decomposition algorithm for proving the partial equivalence of pairs of functions.}
-\label{alg:Prove}
+\label{alg:OriginalProve}
 \end{algorithm}
 
 
@@ -92,7 +92,7 @@ input nonrecursive functions. check-block is a C program defined in the main tex
 
 \begin{algorithm}
 \begin{algorithmic}[1]
-\Function {$oldCheck^r$}{function $f$, function $f'$, set of pairs $S$}
+\Function {$Check^r$}{function $f$, function $f'$, set of pairs $S$}
 
 \If {$f$ and $f'$ are syntactically equivalent and all their children are
 either marked "Equivalent" or in $S$}
