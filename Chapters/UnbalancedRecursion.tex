@@ -1,15 +1,20 @@
+\newcommand\os[1]{\textcolor{blue}{[os: #1]}}
+\newcommand\crjs[1]{\textcolor{purple}{[CRJS: #1]}}
 \section{Introduction: why (PART-EQ) cannot prove the equivalence of unbalanced recursive functions}
 Recall from the previous section, that RVT's strategy for proving equivalence is going bottom-up on the call graph. Thus, when trying to prove equivalence of a functions pair $f,f'$, we can assume that all the functions that are called from $f,f'$, other than $f,f'$ themselves if they are recursive, were already proven to be equivalent (otherwise RVT would have aborted in an earlier stage). We will therefore focus in the rest of the thesis on the problem of proving the equivalence of recursive functions, assuming that other functions that are called from within them were already proven equivalent, and are replaced in the verification condition by calls to equivalent uninterpreted functions. In fact, calls to other functions, i.e., not the recursive calls, are not essential for understanding the techniques that we will show here, and hence we will ignore them in the examples, without loss of generality. 
 
 In the following discussion we will use the following definition:
-\begin{definition}[Sync]
-Two recursive functions $f$ and $f'$ are said to be in sync if they reach the same recursive calls to $f$ and $f'$ respectively with the same arguments for every input.
+\begin{definition}[Sync] \label{def:sync}
+Let $f$ and $f'$ be two recursive functions that, for simplicity and without loss of generality, accept a single parameter each. $f$ and $f'$ are said to be in \emph{sync} if for every input, if $f$ is called recursively with a parameter $p$, then $f'$ is also called recursively with $p$, and vice a versa. 
 \end{definition}
-In this section we will study the problem of proving the equivalence of a pair of recursive functions, that are not in sync according to this definition. 
+%
+Note that the recursive calls that the definition refers to are at the top stack frame only.  
+Also, we emphasize that this definition does \emph{not} require that the number of recursive calls is the same on both sides for a given input -- it only considers the parameter sets.
 
+In this section we will study the problem of proving the equivalence of a pair of recursive functions that are \emph{not} in sync. 
 
 The reason that (PART-EQ) (see~\ref{eqn:parteq}) cannot prove equivalence of recursive functions that are not in sync, is that it abstracts the recursive calls with equivalent uninterpreted functions ($UFs$) \cite{DBLP:conf/dac/GodlinS09}, and those do not necessarily return the same value if called with different arguments, which is what happens if $f,f'$ are not in sync. In such a case the equivalence proof typically fails.
-Moreover, if the programs do not share the same base cases, (PART-EQ) fails as well, since for the same input value, in one side a base case is called and in the other a call is made to a UF, which returns a non-deterministic value.
+Moreover, if there exists an input for which $f$ invokes the base case whereas $f'$ makes a recursive call, (PART-EQ) fails as well, because the recursive call is replaced with a UF (which is not matched on the other side), and that UF returns a non-deterministic value which fails the proof.
 
 In the following subsection we will describe previous work\cite{DBLP:conf/fm/StrichmanV16} that attempted to deal with this problem, but only for a relatively simple case, in which there was a single recursive call in each of the two functions. In later sections, we will extend the range of functions that can be proven to be equivalent, and also automate the process beyond what was suggested in \cite{DBLP:conf/fm/StrichmanV16}.
 
@@ -22,9 +27,9 @@ Strichman and Veitsmann \cite{DBLP:conf/fm/StrichmanV16} proposed the following 
 \end{equation}
 This rule is based on domain partitioning: (BASE-EQUIV) proves equivalence for those inputs that invoke a base case in at least one of the two compared functions, and (STEP-EQUIV) proves equivalence for the other inputs, i.e., those that result in a recursive call on both sides.
 
-(BASE-EQUIV) is implemented by blocking all the recursive calls on one side and increasingly unroll the second side until equivalence is proved or timeout is reached. This is done on both programs, and is considered successful if both are successful. The base-cases proof covers all the inputs that reach a base case on either function. More formally, let $in_B(f)$ be the set of inputs that drive $f$ to its base case, i.e., without a recursive (or mutual recursive) calls. Under this notation, (BASE-EQUIV) proves equivalence for the  inputs in $in_B(f) \cup in_B(f')$.
+(BASE-EQUIV) is implemented by blocking all the recursive calls on one side and increasingly unroll the second side until equivalence is proven, or timeout is reached. This is done in both directions, and is declared successful if both proof obligations are verified. The base-cases proof covers all the inputs that reach a base case on either function. More formally, let $in_B(f)$ be the set of inputs that drive $f$ to its base case, i.e., without a recursive (or mutual recursive) calls. Under this notation, (BASE-EQUIV) proves equivalence for the  inputs in $in_B(f) \cup in_B(f')$.
 
-Let $in_S(f)$ be the complement of $in_B(f)$, i.e. the set of inputs that reach at least one recursive call in $f$. (STEP-EQUIV) proves equivalence for $in_S(f) \cap in_S(f')$. To do so, the user manually specifies the unrolling that has to be done for the functions to be in sync, and RVT unwinds the recursions accordingly. The remaining recursive calls are replaced with $UFs$ as before, but reaching them increases a counter called $UFs\_count$. Then, the generated verification program asserts that the $UF$s counter is less than 2  (i.e., a base case was reached in at least one side), or the results upon execution with the same non-deterministic input are equal. 
+Let $in_S(f)$ be the complement of $in_B(f)$, i.e., the set of inputs that reach at least one recursive call in $f$.  (STEP-EQUIV) proves equivalence for $in_S(f) \cap in_S(f')$, which is the complement of the domain that is covered by (BASE-EQUIV) (based on the equivalence $(A \cup B)^c = (A^c \cap B^c)$ for any two sets $A,B$). To do so, the user manually specifies the unrolling that has to be done for the functions to be in sync, and RVT unwinds the recursions accordingly. The remaining recursive calls are replaced with $UFs$ as before, but reaching them increases a counter called $UFs\_count$. Then, the generated verification program asserts that the $UF$s counter is less than 2  (i.e., a base case was reached in at least one side), or the results upon execution with the same non-deterministic input are equal. 
 
 \begin{figure}[h]
 \begin{center}
@@ -49,37 +54,40 @@ int sum2(int n){
 \end{center}
 \end{figure}
 
-As an example, consider the pair $sum1$ and $sum2$ in figure \ref{fig:sum}. To prove STEP-EQUIV$(f,f')$, RVT unrolls $sum1$ once and replaces the remaining recursive calls with $UF$s as can be seen in figure \ref{fig:sumUnrolled}.
+\begin{example}
+Consider the pair $sum1$ and $sum2$ in figure \ref{fig:sum}. To prove STEP-EQUIV$(f,f')$, we first need to manually decide and instruct RVT to unroll $sum1$ once. RVT then unrolls $sum1$ once and replaces the remaining recursive calls with $UF$s as can be seen in figure \ref{fig:sumUnrolled}. Note that after this unrolling, for all input $n$, the value with which the call to the UF is made is the same on both sides, e.g., for $n=5$, it is $3$. When called with the same value, the UF on b oth sides return the same value, which enables the proof. 
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
 \begin{lstlisting}
 int sum1_deepest(int n){
-   UFs_counter++;
-   return sum1_UF(n);
+	UFs_counter++;
+	return sum1_UF(n);
 }
 
 int sum1_(int n){
-   if (n <= 1) return n;
-   return n + sum1_deepest(n-1);
+	if (n <= 1) return n;
+	return n + 
+    	sum1_deepest(n-1);
 }
 
 int sum1(int n){
-   if (n <= 1) return n;
-   return n + sum1_(n-1);
+	if (n <= 1) return n;
+	return n + sum1_(n-1);
 }
 \end{lstlisting}
 \end{minipage}
 \begin{minipage}{7 cm}
 \begin{lstlisting}
 int sum2_deepest(int n){
-   UFs_counter++;
-   return sum2_UF(n);
+	UFs_counter++;
+	return sum2_UF(n);
 }
 
 int sum2(int n){
-   if (n <= 1) return n;
-   return n + n - 1 + sum2_deepest(n-2);
+	if (n <= 1) return n;
+	return n + n - 1 + 
+	    sum2_deepest(n-2);
 }
 \end{lstlisting}
 \end{minipage}
@@ -93,17 +101,19 @@ Those $UF$s also increase the said $UFs\_count$. Then, the verification task tha
 \begin{center}
 \begin{minipage}{7 cm}
 \begin{lstlisting}[escapeinside={(*}{*)}]
-UFs_count = 0
-i = non_det()
-res1 = sum1(i)
-res2 = sum2(i)
-assert(UFs_count < 2 || res1==res2)
+	UFs_count = 0
+	i = non_det()
+	res1 = sum1(i)
+	res2 = sum2(i)
+	assert(UFs_count < 2 || res1==res2)
 \end{lstlisting}
 \end{minipage}
 \caption{A verification program for proving the step case equivalence of $sum1$ and $sum2$ - (STEP-EQUIV)}
 \label{fig:rvtstepcase}
 \end{center}
 \end{figure}
+\end{example}
+
 
 \subsection{Why (STEP-EQUIV) does not work with Multiple Recursive Calls}
 \label{sec:appstepmrc}
@@ -131,9 +141,13 @@ int f2(int n){
 \label{fig:f1f2}
 \end{center}
 \end{figure}
-Let us explore how (SEP-PART-EQ) (see~\ref{eq:sep-part-eq}) applies to the function pair in figure \ref{fig:f1f2}.
-$f1$ is the classic Fibonacci function. $f2$ is similar to $f1$ except that the call  $f1(n-1)$ was unrolled once. As can be seen in figure \ref{fig:f1f2cgunrolled}, after unrolling the same call on $f1$, $f1$ and $f2$ reaches the same related calls. Note how  $f2$'s base case includes the input $n=2$. 
-For the base case proof, $in_B(f1) = {n \leq 1}$ and  $in_B(f2) = {n \leq 2}$, and so $in_B(f1) \cup in_B(f2) = {n \leq 2} $. (BASE-EQUIV) would have determined the pair to be partial equivalent for ${n \leq 2}$ as expected. On the other hand, the step case cannot be proven with any unrolling, because of the $n=2$ case. This happens because the condition of $UFs\_count < 2$ is not strong enough to exclude cases in which some but not all recursive calls are made.
+Let us explore how (SEP-PART-EQ) (see~(\ref{eq:sep-part-eq})) applies to the function pair in figure \ref{fig:f1f2}.
+$f1$ is the classic Fibonacci function. $f2$ is an equivalent function but with different recursive calls in the function body. As can be seen in Fig.~\ref{fig:f1f2cgunrolled}, after unrolling the first recursive call to $f1$, $f1$ and $f2$ reach calls with the same parameters. We call such calls \emph{related}: 
+\begin{definition}[Related Calls]
+	\label{def:relatedcalls}
+	Given two functions $f$ and $f'$, two recursive calls of $f$ and $f'$ respectively are \emph{related} if they are called with equivalent arguments.  
+\end{definition}
+Note how  $f2$'s base case includes the input $n=2$. For the base case proof, $in_B(f1) = {n \leq 1}$ and $in_B(f2) = {n \leq 2}$, and so $in_B(f1) \cup in_B(f2) = {n \leq 2}$. (BASE-EQUIV) would have determined the pair to be partial equivalent for ${n \leq 2}$ as expected. On the other hand, the step case cannot be proven with any unrolling, because of the $n=2$ case. This happens because the condition of $UFs\_count < 2$ is not strong enough to exclude cases in which some but not all recursive calls are made.
 
 \begin{figure}
 \begin{minipage}{.2\textwidth}
@@ -181,11 +195,11 @@ In the rest of this chapter, we will develop a technique for proving the partial
 
 \section{A proof rule for \emph{simple} step recursions: (SIMPLE-MRC-PART-EQ) }
 \label{sec:adaptstep}
-In this subsection, we handle recursive functions with what we call a 'simple step': 
+In this subsection, we handle recursive functions with a property that we call a 'simple step': 
 \begin{definition}[simple step] \label{def:simple}
-A step case of a recursion is called a \emph{simple step} if its control flow contains a single path.
+A function $f$ is called a \emph{simple-step} recursive function if it makes recursive calls at the same call locations for all inputs, or no recursive calls at all.
 \end{definition}
-In other words, if there are multiple paths to make a recursive call in the function, it is not a simple step. All the examples we saw so far are simple-step. In Sec.~\ref{sec:multistep} we will handle the general case. 
+All the examples we saw so far are simple-step. In Sec.~\ref{sec:multistep} we will handle the more general case. 
 
 To prove equivalence for functions with multiple recursive calls we split the input domain to three partitions. This partition takes place after the proper unrolling was applied on both functions so they will be in sync.
 \begin{itemize}
@@ -197,26 +211,25 @@ Since the third element is defined as a complement of the first two, this set cl
 
 We suggest the following proof rule, where  \emph{su} (`synchronization unrolling') denotes unrolling instructions for the two functions:
 \begin{equation}
- {\frac {\text{SIMPLE-BASE-EQUIV}(f_1,f_2,su) \:\text{SIMPLE-STEP-EQUIV}(f_1,f_2,su)}{\text{PARTIAL-EQUIV}(f_1,f_2)}} 
-  (\text{SIMPLE-MRC-PART-EQ})
+ {\frac {\text{SIMPLE-BASE-EQUIV}(f_1,f_2,su) \quad \text{SIMPLE-STEP-EQUIV}(f_1,f_2,su)}{\text{PARTIAL-EQUIV}(f_1,f_2)}} 
+  \quad (\text{SIMPLE-MRC-PART-EQ})
 \end{equation}
 
 (SIMPLE-BASE-EQUIV) proves equivalence for the base and gap case domains, whereas (SIMPLE-STEP-EQUIV) proves the equivalence of the step case domain. We will now describe how we generate the verification conditions corresponding to these premises given $su$, and later in Sec.~\ref{sec:findsyncunrolling} we will present our method to automatically generate $su$.
 
-\subsection{(SIMPLE-BASE-EQUIV) - Proving gap and base cases equivalence}\label{sec:SIMPLE-BASE-EQUIV}
-\crjs{remove the next 2 paragraphs}
-One may suggest addressing the gap  by applying the sync-unrolling before executing the (BASE-EQUIV) proof. The problem with this method is that the gap traces might not reach any of the original base cases of both programs, as we can see in the example in figure \ref{fig:g1g2neq} for $n=2$. By blocking the recursive calls on each side, (BASE-EQUIV) prunes all the inputs that do not reach a base case on at least one side, including the gap's traces, and therefore this attempt is futile.
+\subsection{(SIMPLE-BASE-EQUIV) - Proving equivalence in the base- and gap-cases}\label{sec:SIMPLE-BASE-EQUIV}
+We can extend the core idea of (BASE-EQUIV) to cover the gap-case domain. Recall that (BASE-EQUIV) consists of two phases. In each phase RVT blocks the recursive calls of one side and unrolls the other side until equivalence is proven or timeout is reached. To adapt this method for the gap domain, we need to adjust the first phase, so it does not block the gap's domain. In Sec.~\ref{sec:findsyncunrolling} we will describe how to do this automatically, by computing the unrolling that is necessary for making the two functions be in sync (see Def.~\ref{def:sync}) (we call this the \emph{sync unrolling}) and generate predicates that define the base- and gap-case domains. Blocking all inputs other than their disjunction, by using an \emph{assume} statement, restricts CBMC to the those domains. 
 
-Nevertheless, we can extend the core idea of (BASE-EQUIV) to accomplish this as well. Essentially, (BASE-EQUIV) consists of two phases. In each phase RVT blocks the recursive calls of the relevant side and thus left only with the traces that reach this side's base cases. Then, RVT unrolls the other side until equivalence  is proven or timeout is reached. The first part of each phase is used to restrict the input space, and the other part is driven from the understanding that the base cases of equivalent functions are not so far apart, i.e., they require a small amount of unwinding to be proven equivalent. This method could work to prove equivalence for the gap set, but we need to adjust the restriction to include the gap's inputs as well. To do so we will apply the sync-unrolling and generate the base case preconditions of both programs as described in section \ref{sec:findsyncunrolling}, and their disjunction is the constraint that includes the input of the gap case and the base case. Note that those preconditions are actually the $Weakest\ Precondition$ \cite{10.1145/360933.360975} for the function to reach only the gap and base cases, as the path predicates from the concolic execution are generated this way by definition.
-Hereafter, we will use the term $Extended\ Base\ Cases$ to state all the traces that reach the base cases and the gap cases combined. 
 
-To prove (SIMPLE-BASE-EQUIV), RVT generates a verification program that represents the equivalence we want to prove. The composition of such a program is depicted in algorithm  \ref{alg:ExtendedBaseProof}.
+Hereafter, we will use the term $Extended\ Base\ Cases$ to refer to all the traces that reach the base- and gap-cases combined. 
+
+As in the other proof rules, to prove (SIMPLE-BASE-EQUIV), RVT generates a verification condition in the form of a C program and then checks it. A schematic depiction of this program appears in Fig.~\ref{fig:basegapvefprogram}. Algorithm~\ref{alg:ExtendedBaseProof} describes this process. 
 
 \noindent
 \begin{algorithm}
 \begin{minipage}{\linewidth}
 \begin{algorithmic}[1]
-\Function{ProveExtendedBaseCasesProof}{ Programs $f_1,f_2$, sync-unrolling $su$}
+\Function{ProveSimpleBaseEquiv}{ Programs $f_1,f_2$, sync-unrolling $su$}
     \For { $ i \in \{1,2\}$}\label{step:foreach_p}
 	\State$\bar{f_i}$ = \alg{ApplyUnrolling}($f_i$,$su$)
 	\State $bcpc_i$ = \alg{GetBaseCasePrecondition}$(\bar{f_i})$
@@ -228,13 +241,13 @@ To prove (SIMPLE-BASE-EQUIV), RVT generates a verification program that represen
 	\EndFunction
 \end{algorithmic}
 \end{minipage}
-\caption{A sound algorithm to prove equivalence of programs for their extended base cases.}
+\caption{Generating a verification condition for (SIMPLE-BASE-EQUIV), in the form of a program $P$, and checking it.}
 \label{alg:ExtendedBaseProof}
 \end{algorithm}
-The sync-unrolling $su$ is provided by using the method described in algorithm \ref{alg:Findunrolling}. Note that $su$ have an unrolling instruction for each program and also that those programs are loop free as RVT converts all loops to recursions in an earlier stage. After applying $su$ to both programs, a base case precondition is generated for each program with \alg{GetBaseCasePrecondition}.
+The sync-unrolling $su$ is a sequence of unrolling instruction for the two compared functions, and can be thought of as a pruned call graph (the root is the function, and the leaves are recursive calls that are not unrolled -- rather they are replaced with UFs), which has a form of a tree. For example, it can state that at the top frame, the recursive call at the first call location is unrolled twice and the recursive call at the second call location is unrolled once. At the frame below, at the second call location the recursion is unrolled once, and so on. We will describe how we compute this information later in Alg.~\ref{alg:Findunrolling}. \alg{ApplyUnrolling} applies these unrolling instructions, so now the functions at the leaves are in sync. 
 
-\crjs{beautify this}
-\alg{GetBaseCasePrecondition}$(f)$ computes the base case precondition $bcpc$ that needs to hold in order for no recursive calls to be taken in $f$. This is done as follows. All recursive calls are replaced with call to  functions that has a single line: assume(false). Then RVT uses $Concolic\ Execution$, a method introduced by Sen in \cite{10.1145/1321631.1321746} and implemented in PathCrawler  by Williams et al. \cite{10.1007/11408901_21}, to generate the paths predicates of the feasible paths. The paths with the recursive calls are all blocked and as a result this process will produce the path predicates of the base cases. Since this is a flat program (no loops and recursions), this is guaranteed to terminate with a correct answer. Those preconditions will be used later to restrict the proof to address only the extended base case. RVT calls \alg{CreateVerificationProgram} that combines the programs into a single program $P$ by renaming similar identifiers, generating a non deterministic input and feeding it to both programs. Line \ref{step:assumebcpc12} assumes $bcpc_1 \lor bcpc_2$ at the beginning of $P$ to limit the proof to the extended base case (the complementary formula represent the inputs that reach no base case on either side, which is the step case). At last, equivalence is asserted. A schematic depiction of $P$ is shown in figure \ref{fig:basegapvefprogram}. 
+\alg{GetBaseCasePrecondition}$(f)$ computes the base case precondition $bcpc$ that needs to hold in order for no recursive calls to be taken in $f$. This is done as follows. All recursive calls are replaced with call to functions that has a single line: assume(false). Then RVT uses $Concolic\ Execution$, a method introduced by Sen in \cite{10.1145/1321631.1321746} and implemented in PathCrawler by Williams et al. \cite{10.1007/11408901_21}, to generate the paths predicates of the feasible paths. The paths with the recursive calls are all blocked and as a result this process produces the path predicates of the base cases. Since this is a flat program (no loops and recursions), this is guaranteed to terminate with a correct answer. Those preconditions are used to restrict the proof to the extended base case. RVT calls \alg{CreateVerificationProgram} that combines the programs into a single program $P$ by renaming similar identifiers, generating a non deterministic input and feeding it to both programs. 
+Line \ref{step:assumebcpc12} adds $assume(bcpc_1 \lor bcpc_2)$ at the beginning of $P$. Finally, equivalence is asserted. A schematic depiction of $P$ is shown in figure \ref{fig:basegapvefprogram}. 
 \begin{figure} [h]
 \begin{center}
 \begin{minipage}{7 cm}
@@ -250,42 +263,45 @@ assert(res1==res2)
 \label{fig:basegapvefprogram}
 \end{center}
 \end{figure}
-In fact, we prove the equivalence only for  inputs that satisfy $bcpc_1 \lor bcpc_2$. Symbolic Execution is used to verify $P$. If the verification task is successful, then RVT will deem the extended base-case equivalence of the pair as correct. 
+Symbolic Execution is used to verify $P$. If the verification task is successful, then RVT deems the extended base-case equivalence of the pair as correct. 
+
+\os{The following should be moved to \ref{sec:findsyncunrolling} } \crjs{This was in the beginning of the chapter and I moved it to here, the first place where we address the creation of those predicates.}
+Note that those preconditions are actually the $Weakest\ Precondition$ \cite{10.1145/360933.360975} for the function to reach only the gap and base cases, as the path predicates from the concolic execution are generated this way by definition.
 
 \subsubsection{Comparing Methods to Prove the Extended Base Cases Equivalence}
-We choose to use the Symbolic Execution method to prove the extended base cases equivalence due to complexity reasons. We will compare here the complexity of two alternatives. The first is using CBMC and increasing the unrolling factor until the verification is successful or timeout is reached. The second is using Symbolic Execution. 
-CBMC invokes the SAT solver once after traversing the whole call graph, which is a tree as we unroll the recursions, while the symbolic execution runs in a DFS style on the call graph and calls the SAT solver every time it reaches a leaf.
+We choose to use Symbolic Execution to prove the extended base cases equivalence due to complexity. We will compare here the complexity of two alternatives. The first is using CBMC and increasing the unrolling factor until the verification is successful or timeout is reached. The second is using Symbolic Execution. 
+CBMC invokes the SAT solver once after traversing the whole call graph, which is a tree as we unroll the recursions, while symbolic execution runs in a DFS style on the call graph and calls the SAT solver every time it reaches a leaf.
 
 Assume that we try to prove the said equivalence of two programs $P_1$ and $P_2$ and that at least one of them contains $C$, $C>1$, recursive calls in its body that are executed on the same trace. Without loss of generality, assume that the equivalence is proved when $P_1$ is unrolled $k$ times, for some $k \geq 1$. 
-If we were to use CBMC, the unrolling would create a program that is translated to a formula that its size is bounded by $O(C^k{\cdot}n)$. The call graphs in Fig.~\ref{fig:f1f2cgunrolled} illustrate this point: the number of nodes in such a tree is $O(C^k)$. The encoding to a propositional formula creates a different set of variables for every call, and thus the formula's size has the order of $O(C^k{\cdot}n)$. CBMC calls a SAT solver to solve this formula, which in itself is exponential in the number of variables. Hence the complexity for the verification task is exponential in $O(C^k{\cdot}n)$, thus double exponential in $k$.
+If we were to use CBMC, the unrolling would create a program that is translated to a formula that represents  $C^k$ calls. The call graphs in Fig.~\ref{fig:f1f2cgunrolled} illustrate this point: the number of nodes in such a tree is $O(C^k)$. The encoding to a propositional formula creates a different set of variables for every call, and thus the number of variables in this formula is proportional to $C^k$. CBMC calls a SAT solver to solve this formula, which in itself is exponential in the number of variables. Hence the complexity for the verification task is exponential in $C^k$, thus double exponential in $k$.
 %$O(C_0^{Poly(n)})$ where $Poly(n)$ is a polynomial of $n$, and $C_0$ is a constant. Thus, the complexity is: \[ O(C_0^{Poly({C^k{\cdot}n})}) \]
 
-On the other hand, using Symbolic Execution, the size of the formula is bounded by $O(k{\cdot}n)$ as it represents only a single trace. Symbolic Execution goes through all paths up to a given bound, and the the number of paths is worst-case exponential (this is the known ``path explosion" problem  \cite{10.1007/978-3-540-78800-3_28}). Each of these trace verification tasks is a formula handed to a SAT solver and therefore has an exponential run-time bound. That means that the overall complexity of this method is exponential squared in the program's size. 
-Hence using symbolic execution for this task has better performances than the CBMC based method mentioned above.
+On the other hand, using Symbolic Execution, the size of the formula is proportional to $k$, as it represents only a single trace. Symbolic Execution goes through all paths up to a given bound, and the number of paths is worst-case exponential (this is the known ``path explosion" problem  \cite{10.1007/978-3-540-78800-3_28}). Each of these trace verification tasks is a formula handed to a SAT solver and therefore has an exponential run-time bound. That means that the overall complexity of this method is exponential squared in the program's size. 
+Hence using symbolic execution for this task has better worst-case complexity.
 
-
-\subsection{(SIMPLE-STEP-EQUIV) - Proving step case equivalence}
+\subsection{(SIMPLE-STEP-EQUIV) - Proving step-case equivalence}
 \label{sec:SIMPLE-STEP-EQUIV}
 \noindent
 \begin{algorithm}
 \begin{minipage}{\linewidth}
 \begin{algorithmic}[1]
-\Function{ProveStepCaseEquivalence}{ Programs $f_1,f_2$, sync-unrolling $su$, precondition $ebcp$}
+\Function{ProveSimpleStepEquiv}{ Programs $f_1,f_2$, sync-unrolling $su$, precondition $ebcp$}
 	\State$\bar{f_1}$ = \alg{ApplyUnrolling}($f_1$,$su$)
 	\State$\bar{f_2}$ = \alg{ApplyUnrolling}($f_2$,$su$)
 	\State $P$ = \alg{CreateVerificationProgram}$(\bar{f_1},\bar{f_2})$
 	\State $P$ = \alg{ReplaceRecursionsWithUFs}$(P)$
 	\State $P$ = \alg{AddAssumption}($P,!ebcp$)
     \State $P$ = \alg{AddEquivalenceAssertion}($P$)
-    \State return \alg{CBMC}($P$)
+    \State return \alg{CBMC}($P$) \os{why CBMC here and not symb. execution ? }
+    \crjs{Initially this was because CBMC supports UFs, but I have found how to invoke the generation UFs without the CBMC macro. I can try KLEE on those UFs and see if it achieves better results. The program is loop/recursive free at this point and so KLEE have no advantages, so I am not sure it is interesting. RVT have already put a lot of effort in supporting multiple variables types with CBMC (such as ptr to arrays) and therefore I think we should stick to CBMC here}
 	\EndFunction
 \end{algorithmic}
 \end{minipage}
 \caption{A sound algorithm to prove equivalence of programs for their extended base cases.}
 \label{alg:StepCaseProof}
 \end{algorithm}
-The step-case proof tries to prove the general case for inputs that are not contained in the extended base case set. In the step case, after applying sync-unrolling, if an input's trace reaches only related recursive calls then we can say that the pair is equivalent for the step case. Algorithm \ref{alg:StepCaseProof} describes RVT's process to do so.
-\alg{ProveStepCaseEquivalence} receives the sync-unrolling $su$ that is provided by using the method described in algorithm \ref{alg:Findunrolling}. It also receives the extended base case precondition $bcpc_1 \lor bcpc_2$ that is generated in algorithm \ref{alg:ExtendedBaseProof} and is aliased here as $ebcp$. As we portrayed the requirements for the step-case proof in section \ref{sec:adaptstep}, we refined the input space to include only step case inputs by using the negation of $bcpc_1 \lor bcpc_2$. The key element of this proof is replacing all the recursive calls that are left after applying $su$ with $UF$s. The reason we can do so is because the important thing for this proof is whether all the recursive calls have related calls. The proof is agnostic to the body of those calls and therefore they can be replaced with $UF$s. As $f_1$ and $f_2$ are loop-free and after applying \alg{ReplaceRecursionsWithUFs} $P$ is also recursion free, the verification task of $P$ is simplified to verify a flat program with no need of unwinding. $P$ is presented in figure \ref{fig:stepvefprogram}. $\hat{f_i}$ stands for the function $f_i$ after being unrolled and the recursive calls replaced with $UF$s. If CBMC validate $P$ then we know the pair is step-case equivalent. 
+The step-case proof covers the inputs that are not contained in the extended base case domain. Algorithm \ref{alg:StepCaseProof} describes RVT's process for this proof.
+\alg{ProveSimpleStepEquiv} receives the sync-unrolling $su$ that was mentioned in the previous subsection. It also receives the extended base case precondition $bcpc_1 \lor bcpc_2$ that is generated in algorithm \ref{alg:ExtendedBaseProof} and is aliased here as $ebcp$. Based on the definition of the step-case domain (see Sec.~\ref{sec:adaptstep}), we restrict the input space to $\lnot(bcpc_1 \lor bcpc_2)$. \alg{ReplaceRecursionsWithUFs}  replaces all the recursive calls (those that are left after applying $su$) with $UF$s. Now $f_1$ and $f_2$ are loop-free and recursion-free, and hence can be checked with CBMC. $P$ is presented in figure \ref{fig:stepvefprogram}. $\hat{f_i}$ stands for the function $f_i$ after being unrolled and the recursive calls replaced with $UF$s. If CBMC validates $P$ then the pair of input functions is declared by RVT to be step-case equivalent. 
 \begin{figure} [h]
 \begin{center}
 \begin{minipage}{7 cm}
@@ -303,17 +319,10 @@ assert(res1==res2)
 \end{figure}
 
 \section{Automatic Synchronization of Recursive Functions}
-%\subsection{The Need To Automatically Synchronize Functions}
-To prove equivalence for recursive functions, RVT needs to unroll them so they will be in sync. The motivation for automating the process of finding such an unrolling is clear, and will become even more evident later in the chapter when we consider more complicated cases, in which more involved rules will be presented, for functions with multiple recursive calls. 
-
-As stated before, RVT replaces all the recursive calls with $UF$s. If the functions are out of sync, the calls to the uninterpreted functions with different arguments result in different return values, which fails the proof.
+To prove equivalence of unbalanced recursive functions, RVT needs to unroll them so they will be in sync -- see Def.~\ref{def:sync} and the examples in previous subsections. As stated before, RVT replaces all the recursive calls with $UF$, so if the functions are out of sync, the calls to those $UF$s with different arguments result in different return values, which fails the proof. The motivation for automating the process of finding such an unrolling is clear. 
 
 Consider the functions $f1$ and $f2$ from figure \ref{fig:f1f2}.
-They are not in sync as $f1$ reaches two recursive calls with the parameters: $n-1,n-2$, while $f2$ reaches calls with $n-2,n-2,n-3$ as arguments and thus the calls are not \emph{related}.
-\begin{definition}[Related Calls]
-\label{def:relatedcalls}
-Given two functions $f$ and $f'$, two recursive calls of $f$ and $f'$ respectively are \emph{related}  if they are called with equivalent arguments.  
-\end{definition}
+They are not in sync as $f1$ reaches two recursive calls with the parameters: $n-1,n-2$, while $f2$ reaches calls with $n-2,n-2,n-3$ as arguments and thus the calls are not related.
 The call graphs of this pair can be seen in figure \ref{fig:f1f2cgs}.
 
 \begin{figure}
@@ -347,10 +356,10 @@ The call graphs of this pair can be seen in figure \ref{fig:f1f2cgs}.
     \draw (f1n) edge [mystyle]  (f1n3);
 \end{tikzpicture}
 \end{minipage}
-\caption{The call graphs of f1 and f2 from figure \ref{fig:f1f2}.}
+\caption{The call graphs of $f1$ and $f2$ from Fig.~\ref{fig:f1f2}.}
 \label{fig:f1f2cgs}
 \end{figure}
-Clearly, $f1$ and $f2$ are out of sync. However, unrolling the call of $f1(n-1)$ once solves this problem: see figure \ref{fig:f1f2unrolled}. As in~\cite{DBLP:conf/fm/StrichmanV16} unrolling is done by creating a new function $f1\_$ that has an identical body as $f1$ and replacing the call to $f1(n-1)$ with $f1\_(n-1)$.
+However, unrolling the call of $f1(n-1)$ once solves this problem: see figure \ref{fig:f1f2unrolled}. As in~\cite{DBLP:conf/fm/StrichmanV16} unrolling is done by creating a new function $f1\_$ that has an identical body as $f1$ and replacing the call to $f1(n-1)$ with $f1\_(n-1)$.
 
 \begin{figure}[h]
 \begin{center}
@@ -394,15 +403,17 @@ More generally, call graphs of recursions might have a more complicated pattern 
 We now describe a method for finding sync-unrolling when possible.
 
 \subsection{Finding the sync-unrolling}
-Our method, described in algorithm \ref{alg:Findunrolling}, finds an input to the functions and corresponding sync-unrolling $su$, if such an unrolling exists. Of course, we can also force the input to a given value or range. For functions $f$,$f'$ with a simple control flow (as the Fibonacci implementations in figure \ref{fig:f1f2}), a single unrolling is sufficient, whereas for others a domain partitioning is necessary. This issue is discussed in section \ref{sec:multistep} . 
+Our method, described in algorithm \ref{alg:Findunrolling}, finds an input to the functions and corresponding sync-unrolling $su$, if such an unrolling exists. 
+%Of course, we can also force the input to a given value or range. 
+For functions $f$,$f'$ with a simple control flow (as the Fibonacci implementations in figure \ref{fig:f1f2}), a single unrolling is sufficient, whereas for others a domain partitioning is necessary. This issue is discussed in section \ref{sec:multistep} . 
 
 Consider figure \ref{fig:f1f2cgunrolled}, where $f1$ is unrolled once. The leaves of the two call graphs can be pairwise matched to one another, such that a matched pair represents related calls. To find such an unrolling automatically, we create a C program for CBMC, that its counterexample represents the unrolling numbers per function call site. The main idea is that we let CBMC decide whether to make a recursive call or not, and record the parameters where it decides not to make a recursive calls (these will be the leaves of the call graph, where we will call the uninterpreted functions). We assert that at least one recorded parameter on both sides is different, and hence a counterexample that CBMC finds is an input to the functions, and an unrolling in which all parameters are equal under this input. 
 
 
-Our method finds an unrolling for a specific input rather than for the general case of the recursion. But, if the recursion's step case is a simple step, then we can induce that unrolling is a sync-unrolling for any input of the step case.
+While our method finds an unrolling for a specific input, this is enough if the recursion's step case is a simple step.
 The overall algorithm appears in the next subsection. 
 
-\subsection{An Algorithm To Find sync-unrollings} \label{sec:findsyncunrolling}
+\subsection{An algorithm to find sync-unrollings} \label{sec:findsyncunrolling}
 Consider Algorithm \ref{alg:Findunrolling}. Its main functions are: 
 \begin{itemize}
     \item \alg{AddDepthAndCallsTracking}$(f)$ adds the auxiliary infrastructure needed to record the exact call graph of a given counterexample. This is done by adding the depth and the recursive call site (i.e. each recursive is given an index according to their order of appearance in the function) to the functions calls so CBMC could show them when producing the counterexample.
@@ -458,7 +469,7 @@ assert(input_set(*$_1$*) != input_set(*$_2$*))
 \label{alg:Findunrolling}
 \end{algorithm}
 
-We will demonstrate the method on the pair from figure \ref{fig:f1f2}. After applying the setup in the for loop in line \ref{step:setupforsu}, $f_1$ and $f_2$ are transformed to the pair in figure \ref{fig:f1f2susetup}. \os{what are recursive_call_site ?}
+We will demonstrate the method on the pair of functions from figure \ref{fig:f1f2}. After applying the setup in the for loop in line \ref{step:setupforsu}, $f_1$ and $f_2$ are transformed to the pair in figure \ref{fig:f1f2susetup}.
 \begin{figure}[h]
 \begin{center}
 \begin{lstlisting}
@@ -488,7 +499,7 @@ int f2(int n, int depth, int recursive_call_site){
 \label{fig:f1f2susetup}
 \end{center}
 \end{figure}
-
+%
 Then, the program $P$ generated in line \ref{step:create} is shown in figure \ref{fig:findcutverfprogramf1f2}.
 \begin{figure} [h]
 \begin{center}
@@ -507,16 +518,16 @@ assert(recorded_n1 != recorded_n2)
 \label{fig:findcutverfprogramf1f2}
 \end{center}
 \end{figure}
-
+%
 After unwinding $P$ enough times CBMC will find a counterexample for any n bigger than 2, from which \alg{GenerateSynchronizingUnrolling} derives the sync-unrolling shown in figure \ref{fig:f1f2cgunrolled}.
 
 
 \section{A proof rule for \emph{complex} step recursions: (COMPLEX-MRC-PART-EQ)}
 \label{sec:multistep}
 \subsection{Why (SIMPLE-MRC-PART-EQ) fails on complex-step recursions}
-We say that a recursive function has a \emph{complex} step if it does not have a simple step, as per Def.~\ref{def:simple}. In other words, the control flow of its step contains two or more paths.
+We say that a recursive function has a \emph{complex} step if it does not have a simple step, as per Def.~\ref{def:simple}. 
 
-Let's examine the recursions in figure \ref{fig:f1f2cond}.
+Consider the recursions in figure \ref{fig:f1f2cond}.
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
@@ -544,10 +555,9 @@ int h2(int n){
 \label{fig:f1f2cond}
 \end{center}
 \end{figure}
-For $n\leq 1$ both functions behave the same. For $n=2$, $n$ is even and thus the same related recursive calls are executed on both sides. As we have seen in the example from figure \ref{fig:f1f2}, for $n\geq3$ the two possible steps are interchangeable for calculating the Fibonacci sequence. Nevertheless, (SIMPLE-MRC-PART-EQ) cannot find a useful sync-unrolling to prove equivalence for this pair. The way algorithm \ref{alg:Findunrolling} works, RVT finds a specific input for which all the recursive calls have related calls. In our example, \alg{FindSyncUnrolling} can pick $n=3$, and the sync-unrolling will be to unroll the call $h1(n-1)$ once and block every other call (including the calls in the unrolled instance of $h1$) on both sides. Unfortunately, when trying to prove step case equivalence, RVT will generate counterexamples for even values of $n$, as for those values $h2(n-1)$ have no related call of on $h1$ (because $h1(n-1)$ is unrolled). We understand here that we need a proof strategy that can deal with odd and even values of $n$. More generally, proving equivalence for recursion with complex rules should address different paths on the steps, because unlike simple steps, a sync-unrolling that works for one path in a complex step isn't necessarily the one needed to prove another path.
+For $n\leq 1$ both functions behave the same. For $n=2$, $n$ is even and thus the same related recursive calls are executed on both sides. As we have seen in the example from figure \ref{fig:f1f2}, for $n\geq3$ the two possible steps are interchangeable for calculating the Fibonacci sequence. Nevertheless, (SIMPLE-MRC-PART-EQ) cannot find a useful sync-unrolling to prove equivalence for this pair. The way algorithm \ref{alg:Findunrolling} works, RVT finds a specific input for which all the recursive calls have related calls. In our example, \alg{FindSyncUnrolling} can pick $n=3$, and the sync-unrolling will be to unroll the call $h1(n-1)$ once and block every other call (including the calls in the unrolled instance of $h1$) on both sides. Unfortunately, when trying to prove step case equivalence, RVT will generate counterexamples for even values of $n$, as for those values $h2(n-1)$ have no related call of on $h1$ (because $h1(n-1)$ is unrolled). We see here that we need a proof strategy that can deal with odd and even values of $n$. More generally, proving equivalence for recursive functions may require addressing different paths on the steps, because unlike simple steps, a sync-unrolling that works for one path in a complex step isn't necessarily the one needed to prove another path.
 
-In the next subsection we will show how to partition the domain such that each partition induces a single trace of the program, thus addressing only a single path on each function's step, and solving this problem. 
-
+In the next subsection we will show how to partition the domain such that each partition induces a single trace of the program, thus addressing only a single path on each function's step. \os{single path is an overkill. We need all the paths that result in invoking the same recursive calls at the top frame}
 
 \subsection{Proving Equivalence of Complex-Step Recursive Functions}
 Given two functions as described in the previous subsection, we would like to decompose them to multiple functions such that each of them has a simple step. We will then prove the equivalence of each such pair of functions. For this purpose we will use path predicates to divide the input domain. Formally, let $CF(f)$ be the set of all the paths in the control flow of the top frame of a function $f$. Let $in(p)$ denote all the inputs that their traces go through the path $p$, $f|_a$ denote the function $f$ with an assumption $a$ restricting its inputs, and $base(f_1,f_2)=in_B(f_1) \cup in_B(f_2)$ ($in_B(f)$ was described in section \ref{sec:prev}).
@@ -557,12 +567,17 @@ Based on this notation, we define the proof rule (COMPLEX-MRC-PART-EQ):
 {\frac{
   {\displaystyle {\bigwedge_{p_1\in CF(f_1)}\bigwedge_{p_2\in CF(f_2)}}}\text{SIMPLE-MRC-PART-EQ}(f_1|_{base(f_1,f_2) \cup in(p_1)},f_2|_{base(f_1,f_2) \cup in(p_2)})}{\text{PARTIAL-EQUIV}(f_1,f_2)}}\text{(COMPLEX-MRC-PART-EQ)}
 \end{equation}
-If we omit the base cases ($base(f_1,f_2)$), either (SIMPLE-BASE-EQUIV) and (BASE-EQUIV) would have been vacuously true for any path of the step cases. By including the base cases to each pair of step cases we can use (SIMPLE-MRC-PART-EQ) without any changes and sustain its soundness. (COMPLEX-MRC-PART-EQ) covers all the possible pairs of paths, and due to its exhaustive nature and the fact that for each pair of recursions (SIMPLE-MRC-PART-EQ) is sound (as shown in \ref{sec:MRCsoundness}), we can conclude that (COMPLEX-MRC-PART-EQ) is sound as well.
+\os{SIMPLE-MRC-PART-EQ does not receive parameters. why not separate to simple-base-equiv and complex-step-equiv, this will solve the problem and avoid the addition of the ext-base domain. change text accordingly. ?}
+\crjs{I am not sure I understand the problem. Correct me if I am wrong, but there are 2 issues here:
+1. SIMPLE-MRC-PART-EQ does not receive parameters. I thought that a proof rule implicitly inherit the parameters of its premises ($su$ should be addressed), and as it is a proof rule for validating the equivalence of 2 programs the notation here is straight forward.
+2. You want to avoid the addition of the ext-base to each pair <p1,p2>. This is impossible because each step (might) produce another gap that SIMPLE-BASE-EQUIV need to prove. Or did you mean something else? }
+
+If we omit the base cases ($base(f_1,f_2)$), either (SIMPLE-BASE-EQUIV) and (BASE-EQUIV) would have been vacuously true for any path of the step cases. By including the base cases to each pair of step cases we can use (SIMPLE-MRC-PART-EQ) without any changes and sustain its soundness. (COMPLEX-MRC-PART-EQ) covers all the possible pairs of paths, and due to its exhaustive nature and the fact that for each pair of recursions (SIMPLE-MRC-PART-EQ) is sound, we conclude that (COMPLEX-MRC-PART-EQ) is sound as well.
 
 \begin{algorithm}
 \begin{minipage}{\linewidth}
 \begin{algorithmic}[1]
-\Function{ProveComplexStepsRecursions}{ Functions $f_1,f_2$}
+\Function{ProveComplexMrcPartEq}{ Functions $f_1,f_2$}
     \State $AreEquivalent$ = TRUE
     \For { $ i \in \{1,2\}$}\label{step:foreach_p}
 	\State \label{step:getallpaths} $PathsPredicates_i$ = \alg{GetAllPAths}$(f_i)$
@@ -577,8 +592,8 @@ If we omit the base cases ($base(f_1,f_2)$), either (SIMPLE-BASE-EQUIV) and (BAS
 	\State $f_{pruned}^2$ = \alg{AddAssumption}($f_2$, $pp_2 \lor pp_{f_{base}^2}$) 
 	\label{step:assmp2}
 	\State su = \alg{FindSyncUnrolling}($f_{pruned}^1$,$f_{pruned}^2$)
-	\State $BaseCaseEquiv$ = \alg{ProveExtendedBaseCasesProof}($f_{pruned}^1,f_{pruned}^2,su$) 
-	\State \label{step:provestepincs} $StepCaseEquiv$ = 	\alg{ProveStepCaseEquivalence}($f_{pruned}^1,f_{pruned}^2,su,bcpc_1\lor bcpc_2$)
+	\State $BaseCaseEquiv$ = \alg{ProveSimpleBaseEquiv}($f_{pruned}^1,f_{pruned}^2,su$) 
+	\State \label{step:provestepincs} $StepCaseEquiv$ = 	\alg{ProveSimpleStepEquiv}($f_{pruned}^1,f_{pruned}^2,su,bcpc_1\lor bcpc_2$)
  \If{ \label{step:false}
 	!( BaseCaseEquiv $\wedge$ StepCaseEquiv)}
 	\State \Return FALSE; 
@@ -593,14 +608,14 @@ If we omit the base cases ($base(f_1,f_2)$), either (SIMPLE-BASE-EQUIV) and (BAS
 \end{algorithm}
 
 Algorithm~\ref{alg:provemcr} shows 
-\alg{ProveComplexStepsRecursions}, which checks the premise of (COMPLEX-MRC-PART-EQ). It partitions the input domain of the two input functions, such that each partition corresponds to a separate path in their flattened version, as explained above. It then tries to prove the equivalence of each pair of such partitions. The main elements of the algorithm are: 
+\alg{ProveComplexMrcPartEq}, which checks the premise of (COMPLEX-MRC-PART-EQ). It partitions the input domain of the two input functions, such that each partition corresponds to a separate path in their flattened version, as explained above. It then tries to prove the equivalence of each pair of such partitions. The main elements of the algorithm are: 
 \begin{itemize}
     \item In line~\ref{step:getallpaths},
     \alg{GetAllPaths($f$)} uses \emph{concolic execution} to get all the paths in the top frame of $f$. To that end, \alg{GetAllPaths} flattens $f$ by replacing recursive calls with calls to empty functions, i.e., functions that have a single $return$ statement and nothing else, and calls PathCrawler \cite{10.1007/11408901_21}. PathCrawler generates a list of path conditions for all the possible paths in that flattened version of $f$.  
     \item In line~\ref{step:GetBaseCasePrecondition} \alg{GetBaseCasePrecondition} is called. It is the same as the one described in section \ref{sec:findsyncunrolling}.
-    \item In line \ref{step:skip_unfeasible} we screen out infeasible paths, as a performance optimization. It is based on the observation that some of the paths predicates combinations in $PathsPredicates_1 \times PathsPredicates_2$ are not feasible. RVT checks this by creating a verification task as presented in figure \ref{fig:checkfeasibility}. In the generated program, we assume both path predicates on the same non deterministic inputs. Sending this task to a model checker results in two option: $1.$ If the verification is successful, that means the conjunctions of the assumptions is unsatisfiable and thus the intersection of $pp_1$ and $pp_2$ is empty. $2.$ If the verification fails, that means the paths in question are feasible as the verification reaches the false assertion.
+    \item In line \ref{step:skip_unfeasible} we screen out infeasible paths, as a performance optimization. It is based on the observation that some of the paths predicates combinations in $PathsPredicates_1 \times PathsPredicates_2$ are not feasible. RVT checks this by creating a verification task as presented in figure \ref{fig:checkfeasibility}. In the generated program, we assume both path predicates on the same non deterministic inputs. Sending this task to a model checker results in two option: $1.$ If the verification is successful, that means the conjunctions of the assumptions is unsatisfiable and thus the intersection of $pp_1$ and $pp_2$ is empty. $2.$ If the verification fails, that means that the paths in question are feasible as the verification reaches the false assertion.
     
-    \item As of line~\ref{step:addassumption}, for each feasible pair of paths predicates, RVT treats the programs as though they had a single step by restricting the inputs and tries to prove them with \alg{ProveExtendedBaseCasesProof} and \alg{ProveStepCaseEquivalence} from sections \ref{sec:SIMPLE-BASE-EQUIV} and \ref{sec:SIMPLE-STEP-EQUIV}, respectively. \alg{AddAssumption} in those algorithms deviates from how is was originally described. Rather than just adding the assumptions, it replaces the assumptions added in algorithm \ref{alg:provemcr} in lines~\ref{step:assmp1} and~\ref{step:assmp2}. Otherwise, when blocking the base cases for example, we will assume contradicting assumptions and the verification task would be vacuously true. The formula $bcpc_1\lor bcpc_2$ in line \ref{step:provestepincs} is computed as part of  \alg{ProveExtendedBaseCasesProof} in the line above. 
+    \item As of line~\ref{step:addassumption}, for each feasible pair of paths predicates, RVT treats the programs as though they had a single step by restricting the inputs and tries to prove them with \alg{ProveSimpleBaseEquiv} and \alg{ProveSimpleStepEquiv} from sections \ref{sec:SIMPLE-BASE-EQUIV} and \ref{sec:SIMPLE-STEP-EQUIV}, respectively. \alg{AddAssumption} in those algorithms deviates from how is was originally described. Rather than just adding the assumptions, it replaces the assumptions added in algorithm \ref{alg:provemcr} in lines~\ref{step:assmp1} and~\ref{step:assmp2}. Otherwise, when blocking the base cases for example, we will assume contradicting assumptions and the verification task would be vacuously true. The formula $bcpc_1\lor bcpc_2$ in line \ref{step:provestepincs} is computed as part of  \alg{ProveSimpleBaseEquiv} in the line above. 
     
     \item In line~\ref{step:false}, we return False (i.e., we failed proving that $f_1$ and $f_2$ are equivalent), if we failed proving equivalence for one of the pairs. 
 \end{itemize}
@@ -656,10 +671,11 @@ int m2(int n, int switch_mode) {
 \end{center}
 \end{figure}
 
+\begin{enumerate}
+	\item 
+Consider the pair of functions in Fig.~\ref{fig:f1f2switch}. As we have seen throughout this chapter, the steps are equivalent for $n > 3$, $m2$'s base case handles $n=2$ and thus this pair is equivalent. For the case where $switch\_mode$ is true, RVT generates a sync-unrolling that unrolls the call $m1(n-1,!do\_nothing)$ once and block everything else on both sides. When trying to prove the related step case, CBMC fails. This happens because in the unrolled frame the polarity of $do\_nothing$ is negated to the polarity of $switch\_mode$ in the related calls due to the odd number of unrolling, and as a consequence there won't be related uninterpreted functions to the recursive calls in the unrolled frame of $m1$ that the SAT solver used by RVT could compare, even though $do\_nothing$ does not affect $m1$'s result.
 
-1. Consider the pair in figure \ref{fig:f1f2switch}. As we have seen throughout this chapter, the steps are equivalent for $n > 3$, $m2$'s base case handles $n=2$ and thus this pair is equivalent. For the case where $switch\_mode$ is true, RVT generates a sync-unrolling that unrolls the call $m1(n-1,!do\_nothing)$ once and block everything else on both sides. When trying to prove the related step case, CBMC fails. This happens because in the unrolled frame the polarity of $do\_nothing$ is negated to the polarity of $switch\_mode$ in the related calls due to the odd number of unrolling, and as a consequence there won't be related uninterpreted functions to the recursive calls in the unrolled frame of $m1$ that the SAT solver used by RVT could compare, even though $do\_nothing$ does not affect $m1$'s result.
-
-Tיhis can be resolved by using static analysis to track unused variables and then adjust their value to be equivalent to the argument sent to the uninterpreted functions on the other side. That way, only parameters that affect the results of each side are taken into account in the proof.
+This can be resolved by using static analysis to track unused variables and then adjust their value to be equivalent to the argument sent to the uninterpreted functions on the other side. That way, only parameters that affect the results of each side are taken into account in the proof.
 
 
 \begin{figure}[h]
@@ -696,9 +712,9 @@ int p2(int n){
 \end{center}
 \end{figure}
 
-2. Consider the pair in figure \ref{fig:redundentcalls}. In this examples, the values in $p2$ are calculated in advance, and are used differently according to the parity of $n$. The problem occur when RVT tries to generate a sync unrolling and one of the recursive calls is redundant (e.g. the result of that recursive call is not used). Algorithm \ref{alg:Findunrolling} aims to find a value for which all the recursive calls have related calls. To achieve that, each recursive calls on each side is either recorded, unrolled or is not reached. The redundant calls in $p2$ are not on a branched path and therefore must be executed, can't be recorded as there is no equivalent recording for them in $p1$ and unrolling them will yield in more redundant calls. Whenever RVT fails to generate a sync unrolling, a default one is used (blocking every recursive call) and it is not enough to prove the equivalence of this pair.
+\item Consider the pair of functions in Fig.~\ref{fig:redundentcalls}. In this example, the values in $p2$ are calculated in advance, and are used differently according to the parity of $n$. The problem occur when RVT tries to generate a sync unrolling and one of the recursive calls is redundant (e.g. the result of that recursive call is not used). Algorithm \ref{alg:Findunrolling} aims to find a value for which all the recursive calls have related calls. To achieve that, each recursive calls on each side is either recorded, unrolled or is not reached. The redundant calls in $p2$ are not on a branched path and therefore must be executed, can't be recorded as there is no equivalent recording for them in $p1$ and unrolling them will yield in more redundant calls. Whenever RVT fails to generate a sync unrolling, a default one is used (blocking every recursive call) and it is not enough to prove the equivalence of this pair.
 
-The solution is using static analysis to determine in advance which recursive calls affect the current path and eliminate the rest if possible. A similar concept is used in IMP-S \cite{inproceedings}, where they searched for control-dependant statements that are impacted by introduced changes to reduce the size of the prove equivalence \crjs{finish this}. The execution of this idea is not trivial and requires further thinking, as a call might be redundant on one frame and executed in a deeper frame.
+The solution is using static analysis to determine in advance which recursive calls affect the current path and eliminate the rest if possible. A similar concept is used in IMP-S \cite{inproceedings}, where they searched for data-dependent statements that are impacted by introduced changes to reduce the size of the equivalence proof. The execution of this idea is not trivial and requires further thinking \os{?? } \crjs{The question marks refer to the "further thinking" part or the following sentence?}, as a call might be redundant on one frame and executed in a deeper frame.
 
 \begin{figure}[h]
 \begin{center}
@@ -730,15 +746,15 @@ int q2(int n){
 }
 \end{lstlisting}
 \end{minipage}
-\caption{Equivalent implementations of Fibonacci. $q2$ have a mutual recursion with $q2\_aux$.}
+\caption{Equivalent implementations of Fibonacci. $q2$ has mutual recursion with $q2\_aux$.}
 \label{fig:mutualrecursion}
 \end{center}
 \end{figure}
 
-3. Consider $q1$ and $q2$ in figure \ref{fig:mutualrecursion}. This implementation is clearly equivalent to the one in figure \ref{fig:f1f2cond}, but using $q2\_aux$ creates a mutual recursion which (COMPLEX-MRC-PART-EQ) does not handle. Previous work on RVT tackled this issue (\cite{DBLP:conf/dac/GodlinS09} and \cite{DBLP:conf/fm/StrichmanV16}) using the idea of finding a sub-map in the strongly connected component of the recursions in the call graph that intersect all cycles, and replacing calls with uninterpreted functions only if they are to functions in the sub-map as can be seen in line \ref{step:select} in algorithm \ref{alg:OriginalProve}.
+\item Consider $q1$ and $q2$ in figure \ref{fig:mutualrecursion}. This implementation is clearly equivalent to the one in figure \ref{fig:f1f2cond}, but using $q2\_aux$ creates a mutual recursion which (COMPLEX-MRC-PART-EQ) does not handle. Previous work on RVT tackled this issue (\cite{DBLP:conf/dac/GodlinS09} and \cite{DBLP:conf/fm/StrichmanV16}) using the idea of finding a sub-map in the strongly connected component of the recursions in the call graph that intersect all cycles, and replacing calls with uninterpreted functions only if they are to functions \os{ ?? } \crjs{I am not sure what is the question here} in the sub-map as can be seen in line \ref{step:select} in algorithm \ref{alg:OriginalProve}.
 
 This technique should be implemented in (COMPLEX-MRC-PART-EQ) to support mutual recursion.
-
+\end{enumerate}
 
 
 
