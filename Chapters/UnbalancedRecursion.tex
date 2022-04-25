@@ -1,5 +1,3 @@
-\newcommand\os[1]{\textcolor{blue}{[os: #1]}}
-\newcommand\crjs[1]{\textcolor{purple}{[CRJS: #1]}}
 \section{Introduction: why (PART-EQ) cannot prove the equivalence of unbalanced recursive functions}
 Recall from the previous section, that RVT's strategy for proving equivalence is going bottom-up on the call graph. Thus, when trying to prove equivalence of a functions pair $f,f'$, we can assume that all the functions that are called from $f,f'$, other than $f,f'$ themselves if they are recursive, were already proven to be equivalent (otherwise RVT would have aborted in an earlier stage). We will therefore focus in the rest of the thesis on the problem of proving the equivalence of recursive functions, assuming that other functions that are called from within them were already proven equivalent, and are replaced in the verification condition by calls to equivalent uninterpreted functions. In fact, calls to other functions, i.e., not the recursive calls, are not essential for understanding the techniques that we will show here, and hence we will ignore them in the examples, without loss of generality. 
 
@@ -460,7 +458,7 @@ assert(input_set(*$_1$*) != input_set(*$_2$*))
 \label{alg:Findunrolling}
 \end{algorithm}
 
-We will demonstrate the method on the pair from figure \ref{fig:f1f2}. After applying the setup in the for loop in line \ref{step:setupforsu}, $f_1$ and $f_2$ are transformed to the pair in figure \ref{fig:f1f2susetup}.
+We will demonstrate the method on the pair from figure \ref{fig:f1f2}. After applying the setup in the for loop in line \ref{step:setupforsu}, $f_1$ and $f_2$ are transformed to the pair in figure \ref{fig:f1f2susetup}. \os{what are recursive_call_site ?}
 \begin{figure}[h]
 \begin{center}
 \begin{lstlisting}
