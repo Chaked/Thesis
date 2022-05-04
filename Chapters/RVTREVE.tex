@@ -1,7 +1,7 @@
 \section{Improving Completeness Using Tools Integration}
-The Second contribution of my research is to integrate RVT with any other program equivalence tool to produce a technique that is more complete than each one of them on its own. We decided to demonstrate this capability with REVE \cite{FelsingGrebingKlebanov2014}, which complete RVT by proving equivalence top-down on the call graph while RVT goes bottom-up. Hereafter we will address REVE specifically, but it can be replaced with any other program equivalence tool. The feature that let us combining both engines is the doom mechanic we have described is section \ref{sec:rvtreview}. One of its advantages is that it let us integrate other tools into the decomposition process. We would like to use REVE in three cases. The first is when RVT fails, REVE will be invoked and will try to prove equivalence for the same pair. The second is when we encounter a doomed function in the call graph that has a mapping to a function in the second program. That means that one of its descendants was a recursive function and could not be proven equivalent to any other function in the second program. As we said, this nullifies RVT capability of proving equivalence. REVE works differently and isn't affected by this limit. Hence, if we execute REVE on the pair, and it will succeed, we will note both functions and their ancestors as not doomed. From this pair and upward in the call graph, RVT can be used again. The third case is when a node is doomed due to lack of mapping. The problem here lies in the mapping algorithm used to generate the input for RVT decomposition algorithm. Once the algorithm fails to map a recursive function it stops trying to map its ancestors as well. This made sense when the only proof engine was RVT, but now it has become an obstacle we must overcome. A new mapping algorithm needs to be chosen, one that can map ancestors even in the case their descendants could not be mapped. A trivial solution could be mapping all the functions with the same signature. We will not discuss this subject on this paper and it will remain for future work. Given a way to expand our mapping, REVE will be able to check for their equivalence. As in the second case, if it succeeds, we will be able to execute RVT again. 
+The Second contribution of my research is to integrate \tool{RVT} with any other program equivalence tool to produce a technique that is more complete than each one of them on its own. We decided to demonstrate this capability with \tool{REVE} \cite{FelsingGrebingKlebanov2014}, which complete \tool{RVT} by proving equivalence top-down on the call graph while \tool{RVT} goes bottom-up. Hereafter we will address \tool{REVE} specifically, but it can be replaced with any other program equivalence tool. The feature that let us combining both engines is the doom mechanic we have described is section \ref{sec:rvtreview}. One of its advantages is that it let us integrate other tools into the decomposition process. We would like to use \tool{REVE} in three cases. The first is when \tool{RVT} fails, \tool{REVE} will be invoked and will try to prove equivalence for the same pair. The second is when we encounter a doomed function in the call graph that has a mapping to a function in the second program. That means that one of its descendants was a recursive function and could not be proven equivalent to any other function in the second program. As we said, this nullifies \tool{RVT} capability of proving equivalence. \tool{REVE} works differently and isn't affected by this limit. Hence, if we execute \tool{REVE} on the pair, and it will succeed, we will note both functions and their ancestors as not doomed. From this pair and upward in the call graph, \tool{RVT} can be used again. The third case is when a node is doomed due to lack of mapping. The problem here lies in the mapping algorithm used to generate the input for \tool{RVT} decomposition algorithm. Once the algorithm fails to map a recursive function it stops trying to map its ancestors as well. This made sense when the only proof engine was \tool{RVT}, but now it has become an obstacle we must overcome. A new mapping algorithm needs to be chosen, one that can map ancestors even in the case their descendants could not be mapped. A trivial solution could be mapping all the functions with the same signature. We will not discuss this subject on this paper and it will remain for future work. Given a way to expand our mapping, \tool{REVE} will be able to check for their equivalence. As in the second case, if it succeeds, we will be able to execute \tool{RVT} again. 
 
-The combined algorithm is shown in Algorithm \ref{alg:Prove}. It receives the mapping as input, and therefore is agnostic to our mapping generation algorithm. There are several key changes it is important to note. In line \ref{step:whileOneSide} we iterate over MSCC nodes in one graph rather than mapping pairs as in Algorithm \ref{alg:OriginalProve}. That is because the original algorithm assumed the mapping must be \emph{connected} - every mapped pair is either a map between leaves in the call graphs or the children of both paired functions are mapped as well. We want to allow now an \emph{unconnected} mapping – pair of functions that their descendants are not necessarily mapped. Iterating over such a mapping is achieved by traversing only one call graph. Because the mapping relation is symmetric, and each pair contains a node from this call graph, it is assured we will cover all the pairs in the mapping. Another significant change is the addition of "RVT enable" which helps to track for each MSCC whether RVT can be invoked to check its equivalence to its mapped MSCC or not. This flag is updated throughout Algorithm \ref{alg:Prove} repetitively in the cases that were described earlier in this section.  
+The combined algorithm is shown in Algorithm \ref{alg:Prove}. It receives the mapping as input, and therefore is agnostic to our mapping generation algorithm. There are several key changes it is important to note. In line \ref{step:whileOneSide} we iterate over MSCC nodes in one graph rather than mapping pairs as in Algorithm \ref{alg:OriginalProve}. That is because the original algorithm assumed the mapping must be \emph{connected} - every mapped pair is either a map between leaves in the call graphs or the children of both paired functions are mapped as well. We want to allow now an \emph{unconnected} mapping – pair of functions that their descendants are not necessarily mapped. Iterating over such a mapping is achieved by traversing only one call graph. Because the mapping relation is symmetric, and each pair contains a node from this call graph, it is assured we will cover all the pairs in the mapping. Another significant change is the addition of "RVT enable" which helps to track for each MSCC whether \tool{RVT} can be invoked to check its equivalence to its mapped MSCC or not. This flag is updated throughout Algorithm \ref{alg:Prove} repetitively in the cases that were described earlier in this section.  
 
 \noindent
 \begin{algorithm}
@@ -43,7 +43,7 @@ The combined algorithm is shown in Algorithm \ref{alg:Prove}. It receives the ma
 \EndFunction
 \end{algorithmic}
 \end{minipage}
-\caption{A decomposition algorithm integrating RVT and REVE}
+\caption{A decomposition algorithm integrating \tool{RVT} and \tool{REVE}}
 \label{alg:Prove}
 \end{algorithm}
 \begin{algorithm}
@@ -60,11 +60,11 @@ The combined algorithm is shown in Algorithm \ref{alg:Prove}. It receives the ma
 \EndIf
 \EndIf
 \State Let $S_{equal}$ be the set of all the functions proved equal so far in our execution
-\State \Return REVE$(f,f',S_{equal})$
+\State \Return \tool{REVE}$(f,f',S_{equal})$
 \EndFunction
 \end{algorithmic}
 \end{minipage}
-\caption{A function called by \alg{Prove} for checking the equivalence of two input functions that are part of MSCCs. This version execute both proving engine - RVT and REVE. $check-block^r$ is the same C program as in the old \alg{$check^r$}.}
+\caption{A function called by \alg{Prove} for checking the equivalence of two input functions that are part of MSCCs. This version execute both proving engine - \tool{RVT} and \tool{REVE}. $check-block^r$ is the same C program as in the old \alg{$check^r$}.}
 \end{algorithm}
 \begin{algorithm}
 \begin{minipage}{\linewidth}
@@ -145,10 +145,100 @@ The combined algorithm is shown in Algorithm \ref{alg:Prove}. It receives the ma
 
 We will now show an example where \alg{Prove} (Algorithm \ref{alg:Prove}) achieves better results in term of completeness than \alg{Prove} (\ref{alg:OriginalProve}). 
 
-Consider $MD_1$ and $MD_2$ in Fig.~\ref{fig:callgraphs}. $map_m$ is defined as $map_m = \{ \pair{main,main'},\pair{f1,f'1}, \pair{f3,f'3},\pair{f5,f'5}\}$. Note that $map_m$ is an \emph{unconnected} mapping ($\pair{f1,f'1}$ have no mapped sons) and could not be generated by RVT before applying the changes we have proposed here. \alg{Prove} from Algorithm \ref{alg:OriginalProve} would have faced two problems when checking equivalence for this example:
+Consider $MD_1$ and $MD_2$ in Fig.~\ref{fig:callgraphs}. $map_m$ is defined as $map_m = \{ \pair{main,main'},\pair{f1,f'1}, \pair{f3,f'3},\pair{f5,f'5}\}$. Note that $map_m$ is an \emph{unconnected} mapping ($\pair{f1,f'1}$ have no mapped sons) and could not be generated by \tool{RVT} before applying the changes we have proposed here. \alg{Prove} from Algorithm \ref{alg:OriginalProve} would have faced two problems when checking equivalence for this example:
 \begin{itemize}
     \item 
 First, it would have stopped when it has finished checking equivalence for $\pair{f3,f'3}$ and $\pair{f5,f'5}$. After covering those pairs, \alg{Prove} cannot find any pair that is uncovered and its children are covered and will terminate its execution. Our new algorithm \alg{CombinedProve} ( \ref{alg:Prove}) resolves this issue by traversing only $MD_1$. Every node in $MD_1$ will be visited and will be checked for equivalence against its pair in $MD_2$ if exists. 
-\item The second problem exists even after changing the traversing algorithm of \alg{Prove}. Once it has reached $f6$ it would have aborted. That is because RVT cannot handle an equivalence checking of functions where one of its children is recursive and is not equivalent to any other function in the other program. In \alg{CombinedProve}, encountering $f6$ would doom all its ancestors, but it will not abort as REVE will be used to check their equivalence. In our example, $f4$ will be encountered but it has no mapping so no check will be performed here. Next, $f1$ will be visited, and because it is mapped to $f'1$, REVE will be check their equivalence. For the sake of this example let us assume it has succeeded. Now that all the recursive children of main are equivalent (i.e. $f1$), $main$ will be undoomed and RVT can be used to check the equivalence of $\pair{main,main'}$.
+\item The second problem exists even after changing the traversing algorithm of \alg{Prove}. Once it has reached $f6$ it would have aborted. That is because \tool{RVT} cannot handle an equivalence checking of functions where one of its children is recursive and is not equivalent to any other function in the other program. In \alg{CombinedProve}, encountering $f6$ would doom all its ancestors, but it will not abort as \tool{REVE} will be used to check their equivalence. In our example, $f4$ will be encountered but it has no mapping so no check will be performed here. Next, $f1$ will be visited, and because it is mapped to $f'1$, \tool{REVE} will be check their equivalence. For the sake of this example let us assume it has succeeded. Now that all the recursive children of main are equivalent (i.e. $f1$), $main$ will be undoomed and \tool{RVT} can be used to check the equivalence of $\pair{main,main'}$.
 \end{itemize}
-Those two virtues of \alg{CombinedProve} over \alg{Prove} are a major step forward towards a more complete equivalence proofs generator.
+
+
+
+Those two virtues of \alg{CombinedProve} over \alg{Prove} are a major step forward towards a more complete regression verification tool.
+
+
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{8 cm}
+
+
+\begin{lstlisting}
+int a[25];
+
+void bubble_sort1(int *a, int sz) {
+  for (int i = sz - 1; i > 0;) {
+    for (int j = 0; j < i;) {
+      if (*(a + j) < *(a + j + 1)) {
+        int t = *(a + j);
+        *(a + j) = *(a + j + 1);
+        *(a + j + 1) = t;
+       }
+       j = j + 1;
+    }
+    i = i - 1;
+  }
+}
+
+int foo1(int *a, int n) {
+    int i = n;
+    int j = 0;
+    while (i >= 0) {
+        bubble_sort1(a + 5 * j, 5);
+        i = i - 1;
+        j++;
+    }
+    return j;
+}
+
+void main2() {
+    foo1(a, 25)1;
+}
+
+
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}{8 cm}
+\begin{lstlisting}
+int a[25];
+
+void bubble_sort2(int *a, int sz) {
+  for (int i = sz - 1; i > 0; i--) {
+    for (int j = 0; j < i; j++) {
+      if (a[j] < a[j + 1]) {
+        int t = a[j];
+        a[j] = a[j + 1];
+        a[j + 1] = t;
+        a[j] = a[j];
+      }
+    }
+  }
+}
+
+int foo2(int *a, int n) {
+    int i = 0;
+    int j = 0;
+    while (i <= n) {
+        bubble_sort2(a + 5 * j, 5);
+        i++;
+        j++;
+    }
+    return j;
+}
+
+void main1() {
+    foo2(a, 25);
+}
+
+\end{lstlisting}
+
+\end{minipage}
+\caption{Two variations of bubble sort that are proved using the tools integration method}
+\label{fig:toolinteg}
+\end{center}
+\end{figure}
+
+Let us examine a concrete example. Consider the pair in Fig~\ref{fig:toolinteg}. The equivalence is determined by the output of the root of the call graphs, $main1$ and $main2$ in our case which are void functions, and the value of the global variables - the array $a$.
+\tool{RVT} converts the loops into recursions and tries to prove the programs bottom-up. It proves the equivalence of $bubble\_sort1$ and $bubble\_sort2$ successfully, but fails on the converted while loops. This is because it verifies them out of their context, and each iteration of its own is not equivalent as the while loops in $foo1$ and $foo2$ advances differently on the value of $i$. \tool{RVT} proceeds to mark the converted while loops and their ancestors ($foo1$, $foo2$, $main1$ and $main2$) as doomed. Now the integrated tool is invoked, \tool{REVE} in that case. \tool{REVE} validate the equivalence of $foo1$ and $foo2$ under the assumption that $bubble\_sort1$ and $bubble\_sort2$ are equivalent (proved by \tool{RVT} earlier). \tool{RVT} un-doom $foo1$, $foo2$ and their ancestors and tries to prove the next uncovered pair which is the <$main1,main2$>. They are syntactically equivalent, and the calls to $foo1$ and $foo2$ were proven equivalent as well and so the equivalence of the programs is validated.
+
+
+

@@ -45,25 +45,25 @@ RVT also creates $map_f$ before sending it to \alg{Prove}, starting with all the
 \State If possible,\label{step:possible} generate a bijective map $map_m$ between nontrivial nodes in $MD_1$ and $MD_2$ that is consistent with 
 \mbox{~~~~~} $map_f$ (it is desirable but not necessary to add pairs of trivial nodes to $map_m$). Otherwise abort.
 \While {$\exists \pair{m_1,m_2} \in map_m$
-          that is uncovered and its children are "Covered"} \label{step:while}
-  \State \label{step:choose} Choose such a pair $\pair{m_1,m_2}$;
+          that is uncovered, not doomed and its children are "Covered"} \label{step:while}
+  \State \label{step:choose} Choose such a pair $\pair{m_1,m_2}$
   \If {$m_1,m_2$ are trivial} \label{step:m1}
-    \State Let $f_1,f_2$ be the functions in $m_1,m_2$, respectively;
-    \If {\alg{Check}($f_1,f_2$)} \label{step:Check}
-          {mark $f_1,f_2$ as "Equivalent"; }
+    \State Let $f,f'$ be the functions in $m_1,m_2$, respectively
+    \If {\alg{Check}($f,f'$)} \label{step:Check}
+          {mark $f,f'$ as "Equivalent" }
     \EndIf \label{step:m1endIf}
     \Else
-      \State \label{step:select}Select a set of function pairs \newline \mbox{~~~~~~~~~~~~~~~~~} $S \subseteq \{\pair{f,f'}\mid \pair{f,f'} \in$ $map_f, f \in m_1, f' \in m_2\}$ that intersect all cycles in $m_1$ and $m_2$;
+      \State \label{step:select}Select a set of function pairs \newline \mbox{~~~~~~~~~~~~~~~~~} $S \subseteq \{\pair{f,f'}\mid \pair{f,f'} \in$ $map_f, f \in m_1, f' \in m_2\}$ that intersect all cycles in $m_1$ and $m_2$
       \For {all $\pair{f,f'} \in S$}\label{step:forall}
         \If  {$\lnot\alg{Check^r}(f,f',S)$} 
-        \label{step:abort}{abort;} 
+        \label{step:abort}{Mark $f,f'$ and their ancestors as doomed and continue } 
         \EndIf
       \EndFor
       \For {all $\pair{f,f'} \in S$} \label{step:forall2}
-         mark $f,f'$ as "Equivalent";
+         mark $f,f'$ as "Equivalent"
       \EndFor
   \EndIf \label{step:selectEnd}
-\State \label{step:mark} Mark $\pair{m_1,m_2}$ as "Covered".
+\State \label{step:mark} Mark $\pair{m_1,m_2}$ as "Covered"
 \EndWhile
 \EndFunction
 \end{algorithmic}
@@ -108,6 +108,5 @@ either marked "Equivalent" or in $S$}
 \end{algorithm}
 
 
-The CBMC functions in \alg{Check} and $Check^r$ are the calls to CBMC as we explained before.
-Although not presented in Algorithm \ref{alg:OriginalProve}, it is important to understand, for the next sections, what RVT does when it fails to prove the equivalence of a mapped pair of recursive functions. As we can see in Algorithm~\ref{alg:Prove}, once RVT fails to prove the equivalence of recursive functions, it aborts. In practice, however, rather than aborting, when a recursive pair is discovered and cannot be proved as equivalent, RVT marks both functions of this pair as `doomed' and similarly marks all their ancestors in both call graphs (it does not abort because there can be other parts of the call graphs that can still be verified). Another occasion where functions are marked as doomed is when a recursive function has no mapping. The reason behind this technique is that like the former case, if equivalence cannot be proven for a recursive function in the call graph, it is impossible for RVT to prove equivalence for any of its ancestors. Non-recursive functions are not marked as doomed because they are inlined into their parents as part of the decomposition algorithm. One of the reasons it is implemented this way is that pairs which could not be proven equivalent only doom their own branches from being proven equivalent. Yet, other leaves of the call graphs could still be equivalent and there is no reason aborting the whole check. 
-\os{Better to just integrate 'dooming' in the algorithm pseudo-code. }  \crjs{Referring the doom mechanic is mainly relevant for the forth chapter. I can remove it from here and address it there to keep this section shorter for the article of the unbalanced recursions.}
+The CBMC functions in \alg{Check} and $Check^r$ are the calls to CBMC as we explained before. As can be seen in Algorithm \ref{alg:OriginalProve}, RVT maintains `doomed' tags of MSCCs. This is because when a recursive pair is discovered and cannot be proved as equivalent, RVT marks both functions of this pair as `doomed' and similarly marks all their ancestors in both call graphs (it does not abort because there can be other parts of the call graphs that can still be verified) and now on those functions are ignored and can not be proved equivalent. Another occasion where functions are marked as doomed is when a recursive function has no mapping. The reason behind this technique is that like the former case, if equivalence cannot be proven for a recursive function in the call graph, it is impossible for RVT to prove equivalence for any of its ancestors. Non-recursive functions are not marked as doomed because they are in-lined into their parents as part of the decomposition algorithm. One of the reasons it is implemented this way is that pairs which could not be proven equivalent only doom their own branches from being proven equivalent. Yet, other leaves of the call graphs could still be equivalent. 
+
