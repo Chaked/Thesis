@@ -1,3 +1,71 @@
+@book{D02,
+	author = {Dustin E. },
+	title = {Effective Software Testing: 50 SpecificWays to Improve Your Testing},
+	date = {2002},
+	publisher = {Addison-Wesley Professional}
+}
+
+@inproceedings{DBLP:conf/esec/Zeller99,
+	author    = {Andreas Zeller},
+	editor    = {Oscar Nierstrasz and
+	Michel Lemoine},
+	title     = {Yesterday, My Program Worked. Today, It Does Not. Why?},
+	booktitle = {Software Engineering - ESEC/FSE'99, 7th European Software Engineering
+	Conference, Held Jointly with the 7th {ACM} {SIGSOFT} Symposium on
+	the Foundations of Software Engineering, Toulouse, France, September
+	1999, Proceedings},
+	series    = {Lecture Notes in Computer Science},
+	volume    = {1687},
+	pages     = {253--267},
+	publisher = {Springer},
+	year      = {1999},
+	url       = {https://doi.org/10.1007/3-540-48166-4\_16},
+	doi       = {10.1007/3-540-48166-4\_16},
+	timestamp = {Tue, 27 Jul 2021 17:16:40 +0200},
+	biburl    = {https://dblp.org/rec/conf/esec/Zeller99.bib},
+	bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+@INPROCEEDINGS{C02,
+	author = {Sorin Craciunescu},
+	title = {Proving the Equivalence of CLP Programs},
+	booktitle = {ICLP},
+	year = {2002},
+	pages = {287-301}
+}
+
+@INPROCEEDINGS{MK02,
+	author = {Panagiotis Manolios and Matt Kaufmann},
+	title = {Adding a Total Order to ACL2},
+	booktitle = {The Third International Workshop on the ACL2 Theorem Prover},
+	year = {2002}
+}
+
+@ARTICLE{MV06,
+	author = {Panagiotis Manolios and Daron Vroon},
+	title = {Ordinal Arithmetic: Algorithms and Mechanization},
+	journal = {Journal of Automated Reasoning},
+	year = {2006},
+	note = {to appear}
+}
+
+@article{DBLP:journals/stvr/GodlinS13,
+	author    = {Benny Godlin and
+	Ofer Strichman},
+	title     = {Regression verification: proving the equivalence of similar programs},
+	journal   = {Softw. Test. Verification Reliab.},
+	volume    = {23},
+	number    = {3},
+	pages     = {241--258},
+	year      = {2013},
+	url       = {https://doi.org/10.1002/stvr.1472},
+	doi       = {10.1002/stvr.1472},
+	timestamp = {Wed, 01 Apr 2020 08:46:22 +0200},
+	biburl    = {https://dblp.org/rec/journals/stvr/GodlinS13.bib},
+	bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
 @inproceedings{DBLP:conf/dac/GodlinS09,
   author    = {Benny Godlin and
                Ofer Strichman},
@@ -13,6 +81,37 @@
   biburl    = {https://dblp.org/rec/bib/conf/dac/GodlinS09},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+
+
+@INPROCEEDINGS{GS07,
+	author = {Benny Godlin and Ofer Strichman},
+	title = {Regression Verification - a practical way to verify programs },
+	booktitle = {VSTTE: Verified Software: theories, tools, experiments},
+	year = {2005},
+	editor = {Bertrand Meyer and Jim Woodcock},
+	volume = {4171},
+	series = lncs,
+	note = {conf in 2005, published in 2007}
+}
+
+@UNPUBLISHED{GS06,
+	author = {Benny Godlin and Ofer Strichman},
+	title = {An Inference Rule for the Equivalence of Procedures},
+	note = {(Submitted to Acta-Informatica)},
+	owner = {ofers},
+	timestamp = {2008.10.06}
+}
+
+@ARTICLE{GS08,
+	author = {Benny Godlin and Ofer Strichman},
+	title = {Inference Rules for Proving the Equivalence of Recursive Procedures},
+	journal = {Acta Informatica},
+	year = {2008},
+	volume = {45},
+	pages = {403--439},
+	number = {6}
+}
+
 @article{DBLP:journals/jacm/Hoare03,
   author    = {C. A. R. Hoare},
   title     = {The verifying compiler: {A} grand challenge for computing research},
@@ -31,448 +130,6 @@
   author    = {C. A. R. Hoare},
   title     = {Procedures and parameters: An axiomatic approach},
   booktitle = {Symposium on Semantics of Algorithmic Languages},
-THESIS - APRIL 9, 2022
-Definition 3.7.1 (Complex Step) The step case of a recursion is a Complex Step if its control flow contains two or
-more paths.
-Let’s examine the recursions in figure 3.13. For n ≤ 1 both functions behave the same. For n = 2, n is even and thus
-i n t h1 ( i n t n ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 ) r e t u r n 1 ;
-r e t u r n h1 ( n − 1 ) + h1 ( n − 2 ) ;
-}
-i n t h2 ( i n t n ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 ) r e t u r n 1 ;
-i f ( n & 1 == 0 )
-r e t u r n h2 ( n − 1 ) + h2 ( n − 2 ) ;
-i f ( n & 1 == 1 )
-r e t u r n h2 ( n − 2 ) + h2 ( n − 2 ) + h2 ( n − 3 ) ;
-}
-Figure 3.13: Equivalent implementations of Fibonacci, whereas h2 has a complex step. n&1 check the parity of n using
-the AND bitwise operation.
-the same related recursive calls are executed on both sides. As we have seen in the example from figure 3.4, for n ≥ 3
-the two possible steps are interchangeable for calculating the Fibonacci sequence. Nevertheless, (MRC-PART-EQ)
-cannot find a useful sync-unrolling to prove equivalence for this pair. The way algorithm 4 works, RVT finds a specific
-input for which all the recursive calls have related calls. In our example, FINDSYNCUNROLLING can pick n = 3,
-and the sync-unrolling will be to unroll the call h1(n − 1) once and block every other call (including the calls in the
-unrolled instance of h1) on both sides. Unfortunately, when trying to prove step case equivalence, RVT will generate
-counterexamples for even values of n, as for those values h2(n − 1) have no related call of on h1 (because h1(n − 1)
-is unrolled). We understand here that we need a proof strategy that can deal with odd and even values of n. More
-generally, proving equivalence for recursion with complex rules should address different paths on the steps, because
-unlike simple steps, a sync-unrolling that works for one path in a complex step isn’t necessarily the one needed to prove
-another path.
-In the next subsection we will show how to partition the domain such that each partition induces a single trace of the
-program, thus addressing only a single path on each function’s step, and solving this problem.
-3.7.2 Proving Equivalence of Complex-Step Recursive Functions
-Given two functions as described in the previous subsection, we would like to decompose them to multiple functions
-such that each of them has a simple step. We will then prove the equivalence of each such pair of functions. For this
-purpose we will use path predicates to divide the input domain. Formally, let CF (f ) be the set of all the paths in the
-control flow of the top frame of a function f . Let in(p) denote all the inputs that their traces go through the path p, f |a
-denote the function f with an assumption a restricting its inputs, and base(f1, f2) = inB (f1) ∪ inB (f2) (inB (f ) was
-described in section 3.2). Based on this notation, we define the proof rule CS-PART-EQ:
-∧
-p1∈CF (f1)
-∧
-p2∈CF (f2) MRC-PART-EQ(f1|base(f1,f2)∪in(p1), f2|base(f1,f2 )∪in(p2 ))
-PARTIAL-EQUIV(f1, f2) (CS-PART-EQ) (3.3)
-If we omit the base cases (base(f1, f2)), either (EXT-BASE-EQUIV) and (BASE-EQUIV) would have been vacuously
-true for any path of the step cases. By including the base cases to each pair of step cases we can use (MRC-PART-EQ)
-without any changes and sustain its soundness. (CS-PART-EQ) covers all the possible pairs of paths, and due to its
-exhaustive nature and the fact that for each pair of recursions (MRC-PART-EQ) is sound (as shown in 3.6), we can
-conclude that (CS-PART-EQ) is sound as well.
-Algorithm 7 shows PROVECOMPLEXSTEPSRECURSIONS, which checks the premise of (CS-PART-EQ). It partitions
-the input domain of the two input functions, such that each partition corresponds to a separate path in their flattened
-23
-THESIS - APRIL 9, 2022
-Algorithm 7 A sound algorithm to prove equivalence for complex step recursions.
-1: function PROVECOMPLEXSTEPSRECURSIONS( Functions f1, f2)
-2: AreEquivalent = TRUE
-3: for i ∈ {1, 2} do
-4: P athsP redicatesi = GETALLPATHS(fi)
-5: ppf i
-base = GETBASECASEPRECONDITION(fi)
-6: end for
-7: for every pair <pp1, pp2> in P athsP redicates1 × P athsP redicates2 do
-8: if pp1 ∩ pp2 = ∅ then
-9: continue
-10: end if
-11: f 1
-pruned = ADDASSUMPTION(f1, pp1 ∨ ppf 1
-base )
-12: f 2
-pruned = ADDASSUMPTION(f2, pp2 ∨ ppf 2
-base )
-13: su = FINDSYNCUNROLLING(f 1
-pruned,f 2
-pruned)
-14: BaseCaseEquiv = PROVEEXTENDEDBASECASESPROOF(f 1
-pruned, f 2
-pruned, su)
-15: StepCaseEquiv = PROVESTEPCASEEQUIVALENCE(f 1
-pruned, f 2
-pruned, su, bcpc1 ∨ bcpc2)
-16: if (!( BaseCaseEquiv ∧ StepCaseEquiv) then
-17: return FALSE;
-18: end if
-19: end for
-20: return TRUE;
-21: end function
-version, as explained above. It then tries to prove the equivalence of each pair of such partitions. The main elements of
-the algorithm are:
-• In line 4, GETALLPATHS(f ) uses concolic execution to get all the paths in the top frame of f . To that end,
-GETALLPATHS flattens f by replacing recursive calls with calls to empty functions, i.e., functions that have a
-single return statement and nothing else, and calls PathCrawler [19 ]. PathCrawler generates a list of path
-conditions for all the possible paths in that flattened version of f .
-• In line 5 GETBASECASEPRECONDITION is called. It is the same as the one described in section 3.4.2.
-• In line 8 we screen out infeasible paths, as a performance optimization. It is based on the observation that
-some of the paths predicates combinations in P athsP redicates1 × P athsP redicates2 are not feasible. RVT
-checks this by creating a verification task as presented in figure 3.14. In the generated program, we assume
-both path predicates on the same non deterministic inputs. Sending this task to a model checker results in two
-option: 1. If the verification is successful, that means the conjunctions of the assumptions is unsatisfiable and
-thus the intersection of pp1 and pp2 is empty. 2. If the verification fails, that means the paths in question are
-feasible as the verification reaches the false assertion.
-• As of line 11, for each feasible pair of paths predicates, RVT treats the programs as though they had a
-single step by restricting the inputs and tries to prove them with PROVEEXTENDEDBASECASESPROOF
-and PROVESTEPCASEEQUIVALENCE from sections 3.5 and 3.6, respectively. ADDASSUMPTION in those
-algorithms deviates from how is was originally described. Rather than just adding the assumptions, it replaces
-the assumptions added in algorithm 7 in lines 11 and 12. Otherwise, when blocking the base cases for example,
-we will assume contradicting assumptions and the verification task would be vacuously true. The formula
-bcpc1 ∨ bcpc2 in line 15 is computed as part of PROVEEXTENDEDBASECASESPROOF in the line above.
-• In line 16, we return False (i.e., we failed proving that f1 and f2 are equivalent), if we failed proving equivalent
-one of the pairs.
-24
-THESIS - APRIL 9, 2022
-i = n o n _ d e t ( )
-assume(pp1(i) && (pp2(i) )
-a s s e r t ( f a l s e )
-Figure 3.14: A verification task for checking the emptiness of an intersection of two input domains, which are defined
-by the path predicates pp1 and pp2 over an input argument i.
-3.7.3 Exploring the Incompleteness of (CS-PART-EQ)
-(CS-PART-EQ) can prove a range of use cases with multiple parameters and various variables types. To the best of our
-knowledge, no existing tools can prove the equivalence of the programs in figures 3.4 and 3.13. Symbolic execution
-based tools such as CLEVER [CRJS: add ref] and ARDiff [CRJS: add ref] are can not handle unbounded loops, while
-other dominant tools in this area such as REVE [CRJS: add ref], fail to prove those as well. We have also tried to create
-a simple verification task such as in figure 2.1 and use state-of-the-art model checkers such as [CRJS: fill this list], and
-they failed as well. Nevertheless, in this section we will discuss some of (CS-PART-EQ) limitations.
-i n t m1 ( i n t n , i n t d o _ n o t h i n g ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 ) r e t u r n 1 ;
-r e t u r n m1 ( n − 1 , ! d o _ n o t h i n g )
-+ m1 ( n − 2 , ! d o _ n o t h i n g ) ;
-}
-i n t m2 ( i n t n , i n t s w i t c h _ m o d e ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 | | n == 2 ) r e t u r n 1 ;
-i n t r e s u l t s = 0 ;
-i f ( s w i t c h _ m o d e )
-r e s u l t s = m2 ( n − 2 , ! s w i t c h _ m o d e )
-+ m2 ( n − 2 , ! s w i t c h _ m o d e )
-+ m2 ( n − 3 , ! s w i t c h _ m o d e ) ;
-i f ( ! s w i t c h _ m o d e )
-r e s u l t s = m2 ( n − 1 , ! s w i t c h _ m o d e )
-+ m2 ( n − 2 , ! s w i t c h _ m o d e ) ;
-r e t u r n r e s u l t s ;
-}
-Figure 3.15: Equivalent implementations of Fibonacci. m2 alternates between two paths in the control flow.
-1. Consider the pair in figure 3.15. As we have seen throughout this chapter, the steps are equivalent for n > 3, m2’s
-base case handles n = 2 and thus this pair is equivalent. For the case where switch_mode is true, RVT generates a
-sync-unrolling that unrolls the call m1(n − 1, !do_nothing) once and block everything else on both sides. When trying
-to prove the related step case, CBMC fails. This happens because in the unrolled frame the polarity of do_nothing is
-negated to the polarity of switch_mode in the related calls due to the odd number of unrolling, and as a consequence
-there won’t be related uninterpreted functions to the recursive calls in the unrolled frame of m1 that the SAT solver
-used by RVT could compare, even though do_nothing does not affect m1’s result.
-This can be resolved by using static analysis to track unused variables and then adjust their value to be equivalent to the
-argument sent to the uninterpreted functions on the other side. That way, only parameters that affect the results of each
-side are taken into account in the proof.
-2. Consider the pair in figure 3.16. In this examples, the values in p2 are calculated in advance, and are used differently
-according to the parity of n. The problem occur when RVT tries to generate a sync unrolling and one of the recursive
-calls is redundant (e.g. the result of that recursive call is not used). Algorithm 4 aims to find a value for which all the
-recursive calls have related calls. To achieve that, each recursive calls on each side is either recorded, unrolled or is not
-reached. The redundant calls in p2 are not on a branched path and therefore must be executed, can’t be recorded as
-there is no equivalent recording for them in p1 and unrolling them will yield in more redundant calls. Whenever RVT
-25
-THESIS - APRIL 9, 2022
-i n t p1 ( i n t n ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 ) r e t u r n 1 ;
-r e t u r n p1 ( n − 1 )
-+ p1 ( n − 2 ) ;
-}
-i n t p2 ( i n t n ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 | | n == 2 ) r e t u r n 1 ;
-i n t r e s u l t s = 0 ;
-i n t r 1 = p2 ( n − 1 ) ;
-i n t r 2 = p2 ( n − 2 ) ;
-i n t r 3 = p2 ( n − 3 ) ;
-i f ( n % 2 == 0 )
-r e s u l t s = r 2 + r 2 + r 3 ;
-i f ( n % 2 == 1 )
-r e s u l t s = r 1 + r 2 ;
-r e t u r n r e s u l t s ;
-}
-Figure 3.16: Equivalent implementations of Fibonacci. p2 alternates between two paths in the control flow but do the
-recursive calls once.
-fails to generate a sync unrolling, a default one is used (blocking every recursive call) and it is not enough to prove the
-equivalence of this pair.
-The solution is using static analysis to determine in advance which recursive calls affect the current path and eliminate
-the rest if possible. The execution of this idea is not trivial and requires further thinking, as a call might be redundant on
-one frame and executed in a deeper frame.
-i n t q1 ( i n t n ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 ) r e t u r n 1 ;
-r e t u r n q1 ( n − 1 )
-+ q1 ( n − 2 ) ;
-}
-i n t q2_aux ( i n t n ) {
-r e t u r n q2 ( n − 2 ) + q2 ( n − 2 )
-+ q2 ( n − 3 ) ;
-}
-i n t q2 ( i n t n ) {
-i f ( n < 1 ) r e t u r n 0 ;
-i f ( n == 1 | | n == 2 ) r e t u r n 1 ;
-i f ( n % 2 == 0 )
-r e t u r n q2_aux ( n ) ;
-i f ( n % 2 == 1 )
-r e t u r n q2 ( n − 1 ) + q2 ( n − 2 ) ;
-}
-Figure 3.17: Equivalent implementations of Fibonacci. q2 have a mutual recursion with q2_aux.
-3. Consider q1 and q2 in figure 3.17. This implementation is clearly equivalent to the one in figure 3.13, but using
-q2_aux creates a mutual recursion which (CS-PART-EQ) does not handle. Previous work on RVT tackled this issue ([ 6]
-and [ 18]) using the idea of finding a sub-map in the strongly connected component of the recursions in the call graph
-that intersect all cycles, and replacing calls with uninterpreted functions only if they are to functions in the sub-map.
-Those technique should be implemented in (CS-PART-EQ) to support mutual recursion.
-26
-Chapter 4
-RVT and REVE Integration
-4.1 Improving Completeness Using Tools Integration
-The first contribution of my research is to integrate RVT and REVE and by doing so produce a technique that is more
-complete than each one of them on its own. More specifically, the new algorithm will be able to prove equivalence
-for at least each case RVT or REVE could. The feature that let us to combine both engines is the doom mechanic we
-have described is section 2. One of its advantages is that it let us integrate other tools into the decomposition process.
-We would like to use REVE in three cases. The first is when RVT fails, REVE will be invoked and will try to prove
-equivalence for the same pair. The second is when we encounter a doomed function in the call graph that has a mapping
-to a function in the second program. That means that one of its descendants was a recursive function and could not be
-proven equivalent to any other function in the second program. As we said, this nullifies RVT capability of proving
-equivalence. As stated in section ??, REVE works differently and isn’t affected by this limit. Hence, if we execute
-REVE on the pair, and it will succeed, we will note both functions and their ancestors as not doomed. From this pair
-and upward in the call graph, RVT can be used again. The third case is when a node is doomed due to lack of mapping.
-The problem here lies in the mapping algorithm used to generate the input for RVT decomposition algorithm. Once the
-algorithm fails to map a recursive function it stops trying to map its ancestors as well. This made sense when the only
-proof engine was RVT, but now it has become an obstacle we must overcome. A new mapping algorithm needs to be
-chosen, one that can map ancestors even in the case their descendants could not be mapped. A trivial solution could be
-mapping all the functions with the same signature. I will experiment whether this idea can hold in real life programs or
-perhaps a more sophisticated idea must be conceived. Once we have figured a way to expand our mapping, REVE will
-be able to check for their equivalence. And as in the second case, if it succeeds, we will be able to execute RVT from
-hereon.
-The combined algorithm is shown in Algorithm 8. It receives the mapping as input, and therefore is agnostic to our
-mapping generation algorithm. There are several key changes it is important to note. In line 6 we iterate over MSCC
-nodes in one graph rather than mapping pairs as in Algorithm ??. That is because the original algorithm assumed the
-mapping must be connected - every mapped pair is either a map between leaves in the call graphs or the children of
-both paired functions are mapped as well. We want to allow now an unconnected mapping – pair of functions that
-their descendants are not necessarily mapped. Iterating over such a mapping is achieved by traversing only one call
-graph. Because the mapping relation is symmetric, and each pair contains a node from this call graph, it is assured
-we will cover all the pairs in the mapping. Another significant change is the addition of "RVT enable" which helps to
-track for each MSCC whether RVT can be invoked to check its equivalence to its mapped MSCC. This flag is updated
-throughout Algorithm 8 repetitively in the cases that were described earlier in this section.
-27
-THESIS - APRIL 9, 2022
-Algorithm 8 A decomposition algorithm integrating RVT and REVE
-1: function PROVE(Programs P, P ′, map between functions mapf )
-2: Inline nonrecursive nonmapped functions;
-3: Generate MSCC DAGs M D1, M D2 from the call graphs of P, P ′;
-4: mark all the nodes in M D1 as "RVT enabled";
-5: If possible, generate a bijective map mapm between nontrivial nodes in M D1 and M D2 that is consistent with
-mapf (it is desirable but not necessary to add pairs of trivial nodes to mapm). Otherwise Abort.
-6: while ∃m1 ∈ M D1 that is uncovered, and its children are “Covered” do
-7: if ∃m2 ∈ M D2 s.t. ∃〈m1, m2〉 ∈ mapm then
-8: if m, m′ are trivial then
-9: Let f, f ′ be the functions in m, m′, respectively;
-10: if checkr (m1, f, f ′, {〈f, f ′〉}) then MARKEQUIVALENT(f 1, f 2, m1);
-11: end if
-12: else
-13: Select non-deterministically S ⊆ {〈f, f ′〉 | 〈f, f ′〉 ∈ mapf (m)}
-that intersect every cycle in m1 and m2;
-14: for each 〈f, f ′〉 ∈ S do
-15: if ¬checkr (m1, f, f ′, S) then
-16: Mark m1 and all its ancestors as not "RVT enabled";
-17: Break;
-18: end if
-19: end for
-20: if m1 is marked "RVT enabled" then
-21: for each 〈f, f ′〉 ∈ S do MARKEQUIVALENT(f 1, f 2, m1)
-22: end for
-23: end if
-24: end if
-25: else
-26: if m1 is not trivial then
-27: Mark m1 and all its ancestors as not "RVT enabled";
-28: end if
-29: end if
-30: Mark m1 as “Covered”;
-31: end while
-32: end function
-Algorithm 9 A function called by PROVE for checking the equivalence of two input functions that are part of MSCCs.
-This version execute both proving engine - RVT and REVE. check − blockr is the same C program as in the old checkr .
-1: function Checkr (M SCC m1, f unction f, f unction f ′, set of pairs S)
-2: if m1 is marked as "RVT enabled" then
-3: if f and f′ are syntactically equivalent and all their children are either marked “Equivalent” or in S then
-4: return true;
-5: end if
-6: if CBMC (Check − blockr (f,f′,S)) then
-7: return true;
-8: end if
-9: end if
-10: Let Sequal be the set of all the functions proved equal so far in our execution
-11: return LLREVE(f, f ′, Sequal)
-12: end function
-28
-THESIS - APRIL 9, 2022
-Algorithm 10 A function called from PROVE to mark the equivalence of m1 and its mapping in M D2.
-1: function MARKEQUIVALENCE(function f, function f′, MSCC m)
-2: Mark f1 and f2 as "Equivalent";
-3: Mark m1 as "RVT enabled";
-4: for each ancestor g of m1 in do
-5: if all the sons of g are marked as "RVT enabled" then
-6: Mark g as "RVT enabled";
-7: end if
-8: end for
-9: end function
-main
-f 1
-f 2 f 4
-f 3 f 5 f 6
-main′
-f ′1
-f ′2 f ′4
-f ′3 f ′5
-Figure 4.1: M D1 and M D2. Mapped nodes are colored with their unique grey.
-We will now show an example where PROVE (Algorithm 8) achieves better results in term of completeness than
-OLDPROVE (??).
-Example 1 Consider M D1 and M D2 in Figure 4.1. mapm is defined as mapm =
-{〈main, main′〉, 〈f 1, f ′1〉, 〈f 3, f ′3〉, 〈f 5, f ′5〉}. Note that mapm is an unconnected mapping (〈f 1, f ′1〉
-have no mapped sons) and could not be generated by RVT before applying the changes we have proposed here.
-OLDPROVE from Algorithm ?? would have faced two problems when checking equivalence for this example. First, it
-would have stopped when it has finished checking equivalence for 〈f 3, f ′3〉 and 〈f 5, f ′5〉. After covering those pairs,
-OLDPROVE cannot find any pair that is uncovered and its children are "Covered" and will terminate its execution. Our
-new PROVE from Algorithm 8 resolves this issue by traversing only M D1. Every node in M D1 will be visited and
-will be checked for equivalence against its pair in M D2 if exists. The second problem exists even after changing the
-traversing algorithm of OLDPROVE. Once it has reached f 6 it would have aborted. That is because RVT cannot handle
-an equivalence checking of functions where one of its children is recursive and is not equivalent to any other function in
-the other program. In PROVE, encountering f 6 would doom all its ancestors, but it will not abort as LLREVE will be
-used to check their equivalence. In our example, f 4 will be encountered but it has no mapping so no check will be
-performed here. Next, f 1 will be visited, and because it is mapped to f ′1, LLREVE will be executed to check their
-equivalence. For the sake of this example let us assume it has succeeded. Now that all the recursive children of main
-are equivalent (i.e. f 1), main will be undoomed and RVT can be used to check the equivalence of 〈main, main′〉.
-Those two virtues of PROVE over OLDPROVE are a major step forward towards a more complete generator for proofs
-of equivalence .
-29
-Chapter 5
-Improving Completeness Using Value
-Analysis
-Value Analysis
-Strichman and Veitsmann [18 ] used value analysis to improve the completeness of RVT. Value Analysis infers bounds on
-a program’s variables’ run-time values. This information might not be precise and is commonly an over approximation of
-the values. RVT uses Frama-C to analysis the values of the given programs. Frama-C is a platform for static analysis of
-C programs based on abstract interpretation [ 2]. Abstract interpretation is a technique to gain information on semantic
-properties of a program by statically analyzing it. In our case the semantic property is the bound of the variables’ values.
-It starts by noting for each variable its largest range (e.g. for 32-bit integers it would be [-2147483648,2147483647]).
-Then, whenever a statement modifying a variable is encountered, its range is refined with respect to intervals arithmetic.
-In the end we will have a range of possible values for each variable in the program. One may choose the abstraction
-level for the property to be analyzed. Following the former example, one may choose to analyze only the sign of the
-variables (i.e. {−, +, 0}) because it might be enough for his purpose, such as knowing the sign of a multiplication
-product. The focus in [18] was on Frama-C value analysis plugin and was extended to support recursive functions. The
-problem was that some functions may be equivalent only under certain circumstances. RVT could not prove equivalence
-in such cases because it checked the equivalence of functions in a free context. This problem is even bigger due to
-the replacement of functions calls with UFs calls and thus more information is lost. The solution was to use the value
-analysis plugin output and assume it before calling UFs. Now, the SMT-Solver has knowledge on the range of the
-possible values this UF can produce, and the over approximation of its output is refined. In Figure 5.1 we can see a pair
-of functions that demonstrates the above. f 1 and f 2 are not equivalent in the general case, but under the context of their
-main function they behave the same and therefore the programs are equivalent.
-The second contribution of my research is using value analysis to assume bounds of input variables at the beginning of
-each function. RVT does not call CBMC with the original code, but rather composes a specific program for the pair it
-wants to check. In its first step it executes the functions to be checked with non-deterministic input. To make it possible,
-RVT slightly changes all the names on both sides so the programs can be merged without names collision. The outputs
-are saved into variables. In the end, RVT asserts that those variables are equal. CBMC translates this program to an SSA
-formula and tries to solve it. If it manages to do so it means it has found a proof for their equivalence. Otherwise it will
-generate a counter example on which the functions yield different results. [18 ] have shown how using value analysis
-could help the SMT solver used by CBMC to limit the values it tries to guess for the output of the UFs. We want to take
-this idea one step further. We would like every SSA formula CBMC creates to include a limit on the input variables. It
-is expected to prune the search space that the SMT solver explores. Using value analysis, we will add an assumption on
-30
-THESIS - APRIL 9, 2022
-i n t f 1 ( i n t n ) {
-i f ( n <=0) r e t u r n −1;
-i f ( f 1 ( n − 1 ) < 0 ) r e t u r n 2 ;
-e l s e r e t u r n 5 ;
-}
-i n t main ( i n t x ) {
-i f ( x > 1 ) {
-r e t u r n f 1 ( x ) ;
-}
-}
-i n t f 2 ( i n t n ) {
-i f ( n <=0) r e t u r n −1;
-i f ( f 2 ( n − 1 ) < 0 ) r e t u r n 4 ;
-e l s e r e t u r n 5 ;
-}
-i n t main ( i n t x ) {
-i f ( x > 1 ) {
-r e t u r n f 2 ( x ) ;
-}
-}
-Figure 5.1: Functions f1 and f2 are not semantically equivalent in a free context, but they are indeed equivalent under
-the context of their calling function main.
-the input variables bounds at the beginning of each function. An interesting benefit is the ability to compute bounds of
-variables that are read inside loops. As one recalls, RVT transforms every loop to a recursive function as a preliminary
-step before executing PROVE. Those generated functions receive as input all the variables that are read inside their
-respective loop [ 17 ]. Therefore, when injecting the assumptions about the variables bounds, all the loops – that are
-now recursive functions – will be assigned limits to their read variables. Those include the variables inside the loop
-condition, and we expect it to help RVT strengthen its ability to prove equivalence.
-v o i d i n c r e a s e 1 ( i n t * a , i n t s z ) {
-i n t i , j ;
-f o r ( i = sz −1 ; i >0 ; i − −) {
-f o r ( j =0 ; j < i ; j ++) {
-assume ( j < 4 && j >= 0 ) ;
-* ( a+ j ) = * ( a+ j ) + 1 ;
-}
-}
-}
-i n t main ( ) {
-i n t a [ 5 ] ;
-i n i t i a l i z e _ a r r a y ( a ) ;
-i n c r e a s e 1 ( a , 5 ) ;
-r e t u r n 0 ;
-}
-v o i d i n c r e a s e 2 ( i n t * a , i n t s z ) {
-i n t i , j ;
-f o r ( i = sz −1 ; i >0 ; i − −) {
-f o r ( j =0 ; j < i ; j ++) {
-assume ( j < 4 && j >= 0 ) ;
-a [ j ] + + ;
-}
-}
-}
-i n t main ( ) {
-i n t a [ 5 ] ;
-i n i t i a l i z e _ a r r a y ( a ) ;
-i n c r e a s e 2 ( a , 5 ) ;
-r e t u r n 0 ;
-}
-Figure 5.2: Functions increase1 and increase2 cannot be proven equivalent by RVT without assuming the bounds of j.
-Example 2 Consider the functions increase1 and increase2 in Figure 5.2. For the sake of this example,
-initialize_array is equal in both programs and initializes the arrays with the exact same values. If the assume
-statements were to be removed, RVT could not have proven the equivalence of increase1 and increase2. On the contrary,
-assuming the bounds of j is enough for RVT to prove the equivalence. As explained in section 2, in our preliminary
-steps we transform loops into recursions. let us call the functions that represent the inner loops as increase1_for_for
-and increase2_for_for respectively. One of the input variables for those functions is j, as it is read in the loop condition.
-Using value analysis we can assume at the beginning of increase1_for_for and increase2_for_for the maximum and
-minimum values of j and by doing so helping RVT proving equivalence.
-31
-Chapter 6
-Evaluation
-32
-
   pages     = {102--116},
   year      = {1971},
   crossref  = {DBLP:series/lnm/1971-188},
@@ -481,6 +138,21 @@ Evaluation
   timestamp = {Tue, 16 May 2017 14:24:25 +0200},
   biburl    = {https://dblp.org/rec/bib/series/lnm/Hoare71},
   bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{ckl2004,
+	AUTHOR    = { Clarke, Edmund
+	and Kroening, Daniel
+	and Lerda, Flavio },
+	TITLE     = { A Tool for Checking {ANSI-C} Programs },
+	BOOKTITLE = { Tools and Algorithms for the Construction and Analysis of Systems (TACAS 2004) },
+	YEAR      = { 2004 },
+	PUBLISHER = { Springer },
+	PAGES     = { 168--176 },
+	ISBN      = { 3-540-21299-X },
+	SERIES    = { Lecture Notes in Computer Science },
+	VOLUME    = { 2988 },
+	EDITOR    = { Kurt Jensen and Andreas Podelski },
 }
 @inproceedings{DBLP:conf/kbse/FelsingGKRU14,
   author    = {Dennis Felsing and
@@ -757,6 +429,19 @@ series = {ASE '07}
 
 @INPROCEEDINGS{9285657,  author={Feng, Nick and Mora, Federico and Hui, Vincent and Chechik, Marsha},  booktitle={2020 35th IEEE/ACM International Conference on Automated Software Engineering (ASE)},   title={Scaling Client-Specific Equivalence Checking via Impact Boundary Search},   year={2020},  volume={},  number={},  pages={734-745},  doi={}}
 
+@inbook{10.1145/3238147.3238178,
+author = {Mora, Federico and Li, Yi and Rubin, Julia and Chechik, Marsha},
+title = {Client-Specific Equivalence Checking},
+year = {2018},
+isbn = {9781450359375},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3238147.3238178},
+abstract = {Software is often built by integrating components created by different teams or even different organizations. With little understanding of changes in dependent components, it is challenging to maintain correctness and robustness of the entire system. In this paper, we investigate the effect of component changes on the behavior of their clients. We observe that changes in a component are often irrelevant to a particular client and thus can be adopted without any delays or negative effects. Following this observation, we formulate the notion of client-specific equivalence checking (CSE) and develop an automated technique optimized for checking such equivalence. We evaluate our technique on a set of benchmarks, including those from the existing literature on equivalence checking, and show its applicability and effectiveness.},
+booktitle = {Proceedings of the 33rd ACM/IEEE International Conference on Automated Software Engineering},
+pages = {441–451},
+numpages = {11}
+}
 
 @inproceedings{10.1145/3368089.3409757,
 author = {Badihi, Sahar and Akinotcho, Faridah and Li, Yi and Rubin, Julia},
@@ -842,7 +527,6 @@ year="2018",
 publisher="Springer International Publishing",
 address="Cham",
 pages="447--451",
-abstract="Ultimate Automizer is a software verifier that generalizes proofs for traces to proofs for larger parts for the program. In recent years the portfolio of proof producers that are available to Ultimate has grown continuously. This is not only because more trace analysis algorithms have been implemented in Ultimate but also due to the continuous progress in the SMT community. In this paper we explain how Ultimate Automizer dynamically selects trace analysis algorithms and how the tool decides when proofs for traces are ``good'' enough for using them in the abstraction refinement.",
 isbn="978-3-319-89963-3"
 }
 
@@ -866,3 +550,52 @@ volume = {7976},
 isbn = {978-3-642-39175-0},
 doi = {10.1007/978-3-642-39176-7_7}
 }
+
+@inproceedings{10.1145/1453101.1453131,
+author = {Person, Suzette and Dwyer, Matthew B. and Elbaum, Sebastian and Pundefinedsundefinedreanu, Corina S.},
+title = {Differential Symbolic Execution},
+year = {2008},
+isbn = {9781595939951},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1453101.1453131},
+doi = {10.1145/1453101.1453131},
+pages = {226–237},
+numpages = {12},
+keywords = {program differencing, symbolic execution, software evolution},
+location = {Atlanta, Georgia},
+series = {SIGSOFT '08/FSE-16}
+}
+
+@InProceedings{10.1007/978-3-319-66706-5_20,
+author="Trostanetski, Anna
+and Grumberg, Orna
+and Kroening, Daniel",
+editor="Ranzato, Francesco",
+title="Modular Demand-Driven Analysis of Semantic Difference for Program Versions",
+booktitle="Static Analysis",
+year="2017",
+publisher="Springer International Publishing",
+address="Cham",
+pages="405--427",
+isbn="978-3-319-66706-5"
+}
+
+@InProceedings{10.1007/10722167_15,
+author="Clarke, Edmund
+and Grumberg, Orna
+and Jha, Somesh
+and Lu, Yuan
+and Veith, Helmut",
+editor="Emerson, E. Allen
+and Sistla, Aravinda Prasad",
+title="Counterexample-Guided Abstraction Refinement ",
+booktitle="Computer Aided Verification",
+year="2000",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="154--169",
+abstract="We present an automatic iterative abstraction-refinement methodology in which the initial abstract model is generated by an automatic analysis of the control structures in the program to be verified. Abstract models may admit erroneous (or ``spurious'') counterexamples. We devise new symbolic techniques which analyze such counterexamples and refine the abstract model correspondingly. The refinement algorithm keeps the size of the abstract state space small due to the use of abstraction functions which distinguish many degrees of abstraction for each program variable. We describe an implementation of our methodology in NuSMV. Practical experiments including a large Fujitsu IP core design with about 500 latches and 10000 lines of SMV code confirm the effectiveness of our approach.",
+isbn="978-3-540-45047-4"
+}
+

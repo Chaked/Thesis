@@ -580,7 +580,7 @@ If we omit the base cases ($base(f_1,f_2)$), either (SIMPLE-BASE-EQUIV) and (BAS
 \Function{ProveComplexMrcPartEq}{ Functions $f_1,f_2$}
     \State $AreEquivalent$ = TRUE
     \For { $ i \in \{1,2\}$}\label{step:foreach_p}
-	\State \label{step:getallpaths} $PathsPredicates_i$ = \alg{GetAllPAths}$(f_i)$
+	\State \label{step:getallpaths} $PathsPredicates_i$ = \alg{GetAllPaths}$(f_i)$
 	\State \label{step:GetBaseCasePrecondition} $pp_{f_{base}^i}$ = \alg{GetBaseCasePrecondition}($f_i$) 
 	\EndFor
 	\For{every pair <$pp_1,pp_2$> in $PathsPredicates_1 \times PathsPredicates_2$}
