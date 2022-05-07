@@ -599,3 +599,91 @@ abstract="We present an automatic iterative abstraction-refinement methodology i
 isbn="978-3-540-45047-4"
 }
 
+@inproceedings{10.1145/800027.808445,
+author = {Boyer, Robert S. and Elspas, Bernard and Levitt, Karl N.},
+title = {SELECT—a Formal System for Testing and Debugging Programs by Symbolic Execution},
+year = {1975},
+isbn = {9781450373852},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/800027.808445},
+doi = {10.1145/800027.808445},
+abstract = {SELECT is an experimental system for assisting in the formal systematic debugging of programs. It is intended to be a compromise between an automated program proving system and the current ad hoc debugging practice, and is similar to a system being developed by King et al. of IBM. SELECT systematically handles the paths of programs written in a LISP subset that includes arrays. For each execution path SELECT returns simplified conditions on input variables that cause the path to be executed, and simplified symbolic values for program variables at the path output. For conditions which form a system of linear equalities and inequalities SELECT will return input variable values that can serve as sample test data. The user can insert constraint conditions, at any point in the program including the output, in the form of symbolically executable assertions. These conditions can induce the system to select test data in user-specified regions. SELECT can also determine if the path is correct with respect to an output assertion. We present four examples demonstrating the various modes of system operation and their effectiveness in finding bugs. In some examples, SELECT was successful in automatically finding useful test data. In others, user interaction was required in the form of output assertions. SELECT appears to be a useful tool for rapidly revealing program errors, but for the future there is a need to expand its expressive and deductive power.},
+booktitle = {Proceedings of the International Conference on Reliable Software},
+pages = {234–245},
+numpages = {12},
+keywords = {Test data generation, Program debugging, Program verification, Symbolic execution, Program testing, Solution of systems of inequalities},
+location = {Los Angeles, California}
+}
+
+@article{10.1145/390016.808445,
+author = {Boyer, Robert S. and Elspas, Bernard and Levitt, Karl N.},
+title = {SELECT—a Formal System for Testing and Debugging Programs by Symbolic Execution},
+year = {1975},
+issue_date = {June 1975},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {10},
+number = {6},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/390016.808445},
+doi = {10.1145/390016.808445},
+abstract = {SELECT is an experimental system for assisting in the formal systematic debugging of programs. It is intended to be a compromise between an automated program proving system and the current ad hoc debugging practice, and is similar to a system being developed by King et al. of IBM. SELECT systematically handles the paths of programs written in a LISP subset that includes arrays. For each execution path SELECT returns simplified conditions on input variables that cause the path to be executed, and simplified symbolic values for program variables at the path output. For conditions which form a system of linear equalities and inequalities SELECT will return input variable values that can serve as sample test data. The user can insert constraint conditions, at any point in the program including the output, in the form of symbolically executable assertions. These conditions can induce the system to select test data in user-specified regions. SELECT can also determine if the path is correct with respect to an output assertion. We present four examples demonstrating the various modes of system operation and their effectiveness in finding bugs. In some examples, SELECT was successful in automatically finding useful test data. In others, user interaction was required in the form of output assertions. SELECT appears to be a useful tool for rapidly revealing program errors, but for the future there is a need to expand its expressive and deductive power.},
+journal = {SIGPLAN Not.},
+month = {apr},
+pages = {234–245},
+numpages = {12},
+keywords = {Symbolic execution, Program verification, Program debugging, Test data generation, Solution of systems of inequalities, Program testing}
+}
+
+@inproceedings{10.5555/1855741.1855756,
+author = {Cadar, Cristian and Dunbar, Daniel and Engler, Dawson},
+title = {KLEE: Unassisted and Automatic Generation of High-Coverage Tests for Complex Systems Programs},
+year = {2008},
+publisher = {USENIX Association},
+address = {USA},
+booktitle = {Proceedings of the 8th USENIX Conference on Operating Systems Design and Implementation},
+pages = {209–224},
+numpages = {16},
+location = {San Diego, California},
+series = {OSDI'08}
+}
+
+@inproceedings{10.1145/1065010.1065036,
+author = {Godefroid, Patrice and Klarlund, Nils and Sen, Koushik},
+title = {DART: Directed Automated Random Testing},
+year = {2005},
+isbn = {1595930566},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1065010.1065036},
+doi = {10.1145/1065010.1065036},
+abstract = {We present a new tool, named DART, for automatically testing software that combines three main techniques: (1) automated extraction of the interface of a program with its external environment using static source-code parsing; (2) automatic generation of a test driver for this interface that performs random testing to simulate the most general environment the program can operate in; and (3) dynamic analysis of how the program behaves under random testing and automatic generation of new test inputs to direct systematically the execution along alternative program paths. Together, these three techniques constitute Directed Automated Random Testing, or DART for short. The main strength of DART is thus that testing can be performed completely automatically on any program that compiles -- there is no need to write any test driver or harness code. During testing, DART detects standard errors such as program crashes, assertion violations, and non-termination. Preliminary experiments to unit test several examples of C programs are very encouraging.},
+booktitle = {Proceedings of the 2005 ACM SIGPLAN Conference on Programming Language Design and Implementation},
+pages = {213–223},
+numpages = {11},
+keywords = {automated test generation, interfaces, program verification, random testing, software testing},
+location = {Chicago, IL, USA},
+series = {PLDI '05}
+}
+
+@article{10.1145/1064978.1065036,
+author = {Godefroid, Patrice and Klarlund, Nils and Sen, Koushik},
+title = {DART: Directed Automated Random Testing},
+year = {2005},
+issue_date = {June 2005},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {40},
+number = {6},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/1064978.1065036},
+doi = {10.1145/1064978.1065036},
+abstract = {We present a new tool, named DART, for automatically testing software that combines three main techniques: (1) automated extraction of the interface of a program with its external environment using static source-code parsing; (2) automatic generation of a test driver for this interface that performs random testing to simulate the most general environment the program can operate in; and (3) dynamic analysis of how the program behaves under random testing and automatic generation of new test inputs to direct systematically the execution along alternative program paths. Together, these three techniques constitute Directed Automated Random Testing, or DART for short. The main strength of DART is thus that testing can be performed completely automatically on any program that compiles -- there is no need to write any test driver or harness code. During testing, DART detects standard errors such as program crashes, assertion violations, and non-termination. Preliminary experiments to unit test several examples of C programs are very encouraging.},
+journal = {SIGPLAN Not.},
+month = {jun},
+pages = {213–223},
+numpages = {11},
+keywords = {software testing, random testing, automated test generation, program verification, interfaces}
+}
+
