@@ -14,6 +14,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{float}
 \usepackage{amsmath} 
+\usepackage{mathtools}
 \usepackage{algorithm}% http://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
 \usepackage{listings}
@@ -35,19 +36,25 @@
 \begin{document}
 
 \maketitle
+
+
+
 \begin{abstract}
 Given two programs $p_1$ and $p_2$, typically two versions of the same program, the goal of \emph{regression verification} is to mark pairs of functions from $p_1$ and $p_2$ that are equivalent, given a definition of equivalence. The most common definition is that of \emph{partial equivalence}, namely that the two functions emit the same output if they are fed with the same input and they both terminate. 
 The strategy used by the Regression Verification Tool (RVT) is to progress bottom up on the call graphs of $P_1,P_2$, abstract those functions that were already proven to be equivalent with uninterpreted functions, turn loops into recursion, and abstract the recursive calls also with uninterpreted functions. This enables it to create verification conditions in the form of small programs that are loop- and recursion-free. This method works well as long as the two compared functions are in sync, and typically fails otherwise. In this work we study the problem of proving equivalence when the two recursive functions are not in sync. Effectively we extend  previous work that studied this problem for functions with a single recursive call site, to the general case. We also introduce a method for detecting automatically the unrolling that is necessary for making two recursive functions synchronize, when possible. We show examples of pairs of functions with multiple recursive calls that can now be proven equivalent with our method, but cannot be proven equivalent with any other verification system.
 \end{abstract}
 
 \chapter*{Dedication}
-To mum and dad
+To my beloved wife who supported me all along.
 
-\chapter*{Declaration}
-I declare that..
 
 \chapter*{Acknowledgements}
-I want to thank...
+This research was carried out under the supervision of Prof. Ofer Strichman as
+part of the degree in Master of Science In Information Management Engineering
+in the Faculty of Industrial Engineering and Management.
+\vspace*{\fill}
+
+The generous financial help of the Technion is gratefully acknowledged
 
 \tableofcontents
 
@@ -64,14 +71,6 @@ I want to thank...
 \chapter{Tools integration to improve completeness}
 \label{chptr:integ}
 \input{Chapters/RVTREVE}
-
-
-\chapter{Future Work and Conclusion}
-\input{Chapters/FutureWorkConclusion}
-
-
-
-
 
 \bibliographystyle{plain}  
 \bibliography{references}

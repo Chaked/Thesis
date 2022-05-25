@@ -1,18 +1,18 @@
-\label{sec:rvtreview}
-\section{RVT's Strategy for Proving Equivalence}
-RVT is a Regression Verification Tool, originally developed by Godlin and Strichman \cite{DBLP:conf/dac/GodlinS09}. RVT tries to prove partial equivalence for a pair of programs. Its strategy to solve the program equivalence challenge is inspired by the Hoare's rule for recursive invocation~\cite{DBLP:series/lnm/Hoare71}: 
+\label{sec:RVTreview}
+\section{\tool{RVT}'s strategy for proving equivalence}
+\tool{RVT} is a Regression Verification Tool, originally developed by Godlin and Strichman \cite{DBLP:conf/dac/GodlinS09}. \tool{RVT} tries to prove partial equivalence for a pair of programs. Its strategy to solve the program equivalence challenge is inspired by the Hoare's rule for recursive invocation~\cite{DBLP:series/lnm/Hoare71}: 
 
 \begin{equation} \label{eqn:parteq}
  {\frac {\{p\} call\ \emph{proc} \{q\} \vdash_H \{p\} \emph{proc}-body \{q\}}{\{p\} call\ \emph{proc} \{q\}}} 
   (PART-EQ) 
 \end{equation}
 
-The rule says that if we can assume that {p} holds before the call to the procedure \emph{proc} and {q} holds afterward, and using this assumption we can prove that if {p} holds before executing the procedure body \emph{proc-body} then {q} holds afterward, we can infer that if {p} holds before calling to \emph{proc} then it is granted that {q} will hold after the call, hence it is an inductive argument: using what we want to infer as a hypothesis for the proof. They introduced a new inference rule~\cite{DBLP:conf/dac/GodlinS09}, in the spirit of the one we saw above. For recursive functions $P1$ and $P2$ the rule is
+The rule says that if we can assume that {p} holds before the call to the procedure \emph{proc} and {q} holds afterward, and using this assumption we can prove that if {p} holds before executing the procedure body \emph{proc-body} then {q} holds afterward, we can infer that if {p} holds before calling to \emph{proc} then it is granted that {q} will hold after the call, hence it is an inductive argument: using what we want to infer as a hypothesis for the proof. Godlin and Strichman introduced a new inference rule~\cite{DBLP:conf/dac/GodlinS09}, in the spirit of the one we saw above. For recursive functions $P1$ and $P2$ the rule is
 \begin{equation}
  {\frac {{\emph{in}[call\ P_1]=\emph{in}[call\ P_2]\rightarrow \emph{out}[call\ P_1]=\emph{out}[call\ P_2]} \vdash{\emph{in}[P_1\ body]=\emph{in}[P_2\ body]\rightarrow \emph{out}[P_1\ body]=\emph{out}[P_2\ body]} }
 {{\emph{in}[call\ P_1]=\emph{in}[call\ P_2]\rightarrow \emph{out}[call\ P_1]=\emph{out}[call\ P_2]}}} 
 \end{equation}
-Less formally, this rule states that if  assuming that $P1$ and $P2$ produce the same output for the same input enables us to prove that the same input yields the same output upon executing $P1$ and $P2$ bodies, then the congruence relation between $P1$ and $P2$ (i.e., equal input results in equal output), holds. It was implemented by replacing recursive calls with calls to uninterrupted functions – $UF$s. An $UF$, as we explained earlier, is an over approximation of the substituted function that returns a non-deterministic value. By replacing the recursive call in both $P1$ and $P2$ with $UF$s that are defined as equal we have fulfilled the first part of the hypothesis. Then, all is left to do is prove the second part in order to prove the equivalence of $P1$ and $P2$. To Prove this equivalence, RVT generates a program calling both programs with the same non-deterministic input and asserts their output is equal as can be seen in figure \ref{fig:rvtmainprogram}.
+Less formally, this rule states that if  assuming that $P1$ and $P2$ produce the same output for the same input enables us to prove that the same input yields the same output upon executing $P1$ and $P2$ bodies, then the congruence relation between $P1$ and $P2$ (i.e., equal input results in equal output), holds. It was implemented by replacing recursive calls with calls to uninterrupted functions – $UF$s. An UF is an over approximation of the substituted function that returns a non-deterministic value. By replacing the recursive calls in both $P1$ and $P2$ with the same UFs (i.e., they emit the same output for the same input) we have fulfilled the first part of the hypothesis. Then, all is left to do is prove the second part in order to prove the equivalence of $P1$ and $P2$. To do so, \tool{RVT} generates a program calling both programs with the same non-deterministic input and asserts their output is equal as can be seen in figure \ref{fig:rvtmainprogram}.
 \begin{figure}[h]
 \begin{center}
 \begin{minipage}{7 cm}
@@ -24,17 +24,18 @@ res2 = P2(i)
 assert(res1 == res2) 
 \end{lstlisting}
 \end{minipage}
-\caption{RVT's Generated Verification Program}
+\caption{\tool{RVT}'s Generated Verification Program}
 \label{fig:rvtmainprogram}
 \end{center}
 \end{figure}
-CBMC is used to prove this assertion or produce a counterexample in case of failure. CBMC is a bounded model checker. Given a C program (possibly annotated with assertions reflecting the user's specification), it tries to verify for various things such as memory safety, general exceptions, undefined behavior, user assertions and more. It does so by unwinding loops and recursions and creating a \emph{Static Single Assignment} SMT (or SAT) formula which in turn is passed to an SMT (or SAT) Solver. The Solver will either prove the generated specification up to a given unwinding depth, or produce a counterexample. 
+\tool{CBMC} is used to validate this assertion unless it finds a counterexample. \tool{CBMC} is a bounded model checker. Given a C program (possibly annotated with assertions reflecting the user's specification), it tries to verify for various things such as memory safety, general exceptions, undefined behavior, user assertions and more. It does so by unwinding loops and recursions and creating a \emph{Static Single Assignment} SMT (or SAT) formula which in turn is passed to an SMT (or SAT) Solver. The solver will either prove the generated specification or produce a counterexample. 
 
-\section{A Decomposition Algorithm For Program Equivalence}
-All we have seen so far did not take any advantage of the similarity between the programs. RVT tries to exploit similarity between the two versions of the program. It aims for the complexity to be a function of the difference between the programs rather than their absolute sizes. To do so it uses the decomposition algorithm that is presented in Algorithm \ref{alg:Prove}. \alg{Prove} receives a pair of programs $P$ and $P'$ and a (optionally partial) mapping between the functions in each program. RVT processes these programs before sending them to \alg{Prove}. All loops are transformed to recursive functions~\cite{DBLP:conf/vstte/StrichmanG05}. The recursive calls are then replaced with uninterpreted functions, hence making the program abstract and `flat', i.e., no loops and recursions. The problem of verifying flat programs is decidable. 
+\section{A decomposition algorithm for program equivalence}
+\label{sec:rvtreview}
+All we have seen so far did not take any advantage of the similarity between the programs. \tool{RVT} tries to leverage the similarity between two versions of the same program. It aims for the complexity to be a function of the difference between the programs rather than their absolute sizes. To do so it uses a decomposition algorithm that is presented in Algorithm \ref{alg:Prove}. \alg{Prove} receives a pair of programs $P$ and $P'$ and a (optionally partial) mapping between the functions in each program. \tool{RVT} processes these programs before sending them to \alg{Prove}. All loops are transformed to recursive functions~\cite{DBLP:conf/vstte/StrichmanG05}. The recursive calls are then replaced with uninterpreted functions, hence making the program abstract and `flat', i.e., no loops and recursions. The problem of verifying flat programs is decidable. 
 
-RVT also creates $map_f$ before sending it to \alg{Prove}, starting with all the obvious mappings – identical functions and global variables with the same name. Then, recursively, it advances on the parse tree of both programs and tries to map more elements (such as variables, functions and types) in isomorphic locations. It is important to note that wrong mapping cannot damage the soundness of \alg{Prove}, just its completeness. 
-\alg{Prove} start by inlining nonrecursive nonmapped functions. Then it generates two graphs $MD_1$ and $MD_2$ where their nodes are the maximal strongly connected components (MSCC) in the call graphs of $P$ and $P'$. Because of the definition of MSCC, $MD_1$ and $MD_2$ are acyclic. After the setup in lines \ref{step:inline}-\ref{step:possible}, it starts traversing $MD_1$ and $MD_2$ bottom-up. Every MSCC is either trivial (i.e., a nonrecursive function) or nontrivial (i.e. one or more functions in a call cycle). When it encounters a pair of trivial MSCCs it checks for equivalence and marks it as equivalent if it manages to prove it (lines \ref{step:m1}-\ref{step:m1endIf}). If a pair of nontrivial MSCCs was encountered, a set $S$ of function pairs that their functions intersect all cycles in both MSCCs is chosen. Equivalence is checked for each of those pairs. In case of failure on any of the pairs, RVT aborts. That is because once RVT cannot prove equivalence for a recursive function (or mutually recursive functions) it cannot proceed proving any of its ancestors. This differs from the trivial MSCC case as functions in trivial MSCCs that RVT could not prove to be equal can be inlined in their ancestors when checking for their equivalence. In case of complete success (i.e., all the pairs in $S$ were proved equivalent), RVT marks all the pairs in $S$ as equivalent (lines \ref{step:select}-\ref{step:selectEnd}). Then the MSCC pair is marked as covered and RVT continues to the next mapped pair (line \ref{step:mark}).
+\tool{RVT} also creates $map_f$ before sending it to \alg{Prove}, starting with all the obvious mappings – identical functions and global variables with the same name. Then, recursively, it advances on the parse tree of both programs and tries to map more elements (such as variables, functions and types) in isomorphic locations. It is important to note that wrong mapping cannot damage the soundness of \alg{Prove}, just its completeness. 
+\alg{Prove} start by inlining nonrecursive nonmapped functions. Then it generates two graphs $MD_1$ and $MD_2$ where their nodes are the maximal strongly connected components (MSCC) in the call graphs of $P$ and $P'$. Because of the definition of MSCC, $MD_1$ and $MD_2$ are acyclic. After the setup in lines \ref{step:inline}-\ref{step:possible}, it starts traversing $MD_1$ and $MD_2$ bottom-up. Every MSCC is either trivial (i.e., a nonrecursive function) or nontrivial (i.e. one or more functions in a call cycle). When it encounters a pair of trivial MSCCs it checks for equivalence and marks it as equivalent if it manages to prove it (lines \ref{step:m1}-\ref{step:m1endIf}). If a pair of nontrivial MSCCs was encountered, a set $S$ of function pairs that their functions intersect all cycles in both MSCCs is chosen. Equivalence is checked for each of those pairs. In case of failure on any of the pairs, \tool{RVT} aborts. That is because once \tool{RVT} cannot prove equivalence for a recursive function (or mutually recursive functions) it cannot proceed proving any of its ancestors. This differs from the trivial MSCC case as functions in trivial MSCCs that \tool{RVT} could not prove to be equal can be inlined in their ancestors when checking for their equivalence. In case of complete success (i.e., all the pairs in $S$ were proved equivalent), \tool{RVT} marks all the pairs in $S$ as equivalent (lines \ref{step:select}-\ref{step:selectEnd}). Then the MSCC pair is marked as covered and \tool{RVT} continues to the next mapped pair (line \ref{step:mark}).
 
 \begin{algorithm}
 \begin{algorithmic}[1]
@@ -51,6 +52,7 @@ RVT also creates $map_f$ before sending it to \alg{Prove}, starting with all the
     \State Let $f,f'$ be the functions in $m_1,m_2$, respectively
     \If {\alg{Check}($f,f'$)} \label{step:Check}
           {mark $f,f'$ as "Equivalent" }
+          \Else \label{step:firstabort}{ Mark $f,f'$ and their ancestors as doomed and continue } 
     \EndIf \label{step:m1endIf}
     \Else
       \State \label{step:select}Select a set of function pairs \newline \mbox{~~~~~~~~~~~~~~~~~} $S \subseteq \{\pair{f,f'}\mid \pair{f,f'} \in$ $map_f, f \in m_1, f' \in m_2\}$ that intersect all cycles in $m_1$ and $m_2$
@@ -83,7 +85,7 @@ are marked "Equivalent"}
 
 \EndIf
 
-\State {\bf return} CBMC ( $check-block (f,f')$);
+\State {\bf return} \tool{CBMC} ( $check-block (f,f')$);
 
 \EndFunction
 \end{algorithmic}
@@ -101,12 +103,12 @@ either marked "Equivalent" or in $S$}
 
 \State {\bf return} true; \EndIf
 
-\State {\bf return} CBMC ( $check-block^r$  $(f,f',S)$); \EndFunction
+\State {\bf return} \tool{CBMC} ( $check-block^r$  $(f,f',S)$); \EndFunction
 \end{algorithmic}
 \caption{A function called by \alg{Prove} for checking the equivalence of two input functions that are part of MSCCs. $check-block^r$ is a C program defined in the main text.}
 \label{alg:Checkr}
 \end{algorithm}
 
 
-The CBMC functions in \alg{Check} and $Check^r$ are the calls to CBMC as we explained before. As can be seen in Algorithm \ref{alg:OriginalProve}, RVT maintains `doomed' tags of MSCCs. This is because when a recursive pair is discovered and cannot be proved as equivalent, RVT marks both functions of this pair as `doomed' and similarly marks all their ancestors in both call graphs (it does not abort because there can be other parts of the call graphs that can still be verified) and now on those functions are ignored and can not be proved equivalent. Another occasion where functions are marked as doomed is when a recursive function has no mapping. The reason behind this technique is that like the former case, if equivalence cannot be proven for a recursive function in the call graph, it is impossible for RVT to prove equivalence for any of its ancestors. Non-recursive functions are not marked as doomed because they are in-lined into their parents as part of the decomposition algorithm. One of the reasons it is implemented this way is that pairs which could not be proven equivalent only doom their own branches from being proven equivalent. Yet, other leaves of the call graphs could still be equivalent. 
+The \tool{CBMC} functions in \alg{Check} and $Check^r$ are the calls to \tool{CBMC} as we previously explained. As can be seen in Algorithm \ref{alg:OriginalProve}, \tool{RVT} maintains `doomed' tags of MSCCs. When a recursive pair is discovered and cannot be proved as equivalent, \tool{RVT} marks both functions of this pair as `doomed' and similarly marks all their ancestors in both call graphs (it does not abort because there can be other parts of the call graphs that can still be verified) and now on those functions are ignored and can not be proved equivalent. Another occasion where functions are marked as doomed is when a recursive function has no mapping. The reason behind this technique is that like the former case, if equivalence cannot be proven for a recursive function in the call graph, it is impossible for \tool{RVT} to prove equivalence for any of its ancestors. Non-recursive functions are not marked as doomed because they are in-lined into their parents as part of the decomposition algorithm. One of the reasons it is implemented this way is that pairs which could not be proven equivalent only doom their own branches from being proven equivalent. Yet, other leaves of the call graphs could still be equivalent. 
 
